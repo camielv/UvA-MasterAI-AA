@@ -8,11 +8,11 @@ import random
 
 class Predator():
     
-    MOVE_UP = (0,1)
-    MOVE_DOWN = (0,-1)
-    MOVE_RIGHT = (1,0)
-    MOVE_LEFT = (-1,0)
-    MOVE_STAY = (0,0)    
+    MOVE_UP = (-1,0)
+    MOVE_DOWN = (1,0)
+    MOVE_RIGHT = (0,1)
+    MOVE_LEFT = (0,-1)
+    MOVE_STAY = (0,0)   
     
     location = (0,0)
     
@@ -22,7 +22,7 @@ class Predator():
     def getLocation(self):
         return self.location
     
-    def randomMove(self, max_x, max_y):
+    def randomMove(self, max_x, max_y, state):
         random_number = random.random()
         prob_move = {self.MOVE_UP: 0.2,
                      self.MOVE_DOWN: 0.2,
@@ -40,7 +40,10 @@ class Predator():
                 new_y = (old_y + move[1]) % max_y
                 
                 self.location = (new_x, new_y)
-                break
+                
+                if self.location == state["prey"]:
+                    return True
+        return False
 
     def move(self, max_x, max_y, state):
-        self.randomMove(max_x, max_y)
+        self.randomMove(max_x, max_y, state)
