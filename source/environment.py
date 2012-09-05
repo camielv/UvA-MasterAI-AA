@@ -3,8 +3,8 @@
 #
 # playingField.py
 # Base Class for the playingfield
-import predator
-import prey
+from predator import Predator
+from prey import Prey
 
 class Environment:
     
@@ -17,7 +17,9 @@ class Environment:
         self.width  = width
         self.height = height
         self.predators = []
-        self.prey = prey.Prey( preyLocation )
+        self.prey = Prey( preyLocation )
+        
+        self.caught = False
     
     def getWidth( self ):
         '''Returns the width of the environment.'''
@@ -29,7 +31,7 @@ class Environment:
     
     def addPredator( self, location ):
         '''Adds a predator to the environment at the given location.'''
-        newPredator = predator.Predator( location )
+        newPredator = Predator( location )
         self.predators.append( newPredator )
     
     def getState( self ):
@@ -37,11 +39,13 @@ class Environment:
         # Create state
         state = dict()
         state['predator'] = []
-        state['prey'] = prey.getLocation
+        state['prey'] = self.prey.getLocation()
         
         # Retrieve predator positions
         for predator in self.predators:
-            state['predator'].append( predator.getLocation )        
+            state['predator'].append( predator.getLocation() )
+        
+        return state
     
     def run( self ):
         '''Performs one step of the simulation.'''
@@ -50,7 +54,9 @@ class Environment:
         
         # Update predator positions
         for predator in self.predators:
-            predator.move( self.width, self.height, state )
+            if predator.move( self.width, self.height, state ):
+                self.caught = True
+                return
             
         # Update prey position
         self.prey.move( self.width, self.height, state )
