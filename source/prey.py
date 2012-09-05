@@ -8,11 +8,11 @@ import random
 
 class Prey():
 
-    MOVE_UP    = (-1, 0)
-    MOVE_DOWN  = ( 1, 0)
-    MOVE_RIGHT = ( 0, 1)
-    MOVE_LEFT  = ( 0,-1)
-    MOVE_STAY  = ( 0, 0)
+    MOVE_UP = (-1,0)
+    MOVE_DOWN = (1,0)
+    MOVE_RIGHT = (0,1)
+    MOVE_LEFT = (0,-1)
+    MOVE_STAY = (0,0)
     
     prob_move = dict()    
     location = (0,0)    
@@ -63,7 +63,7 @@ class Prey():
             for move in possible_moves:
                 self.prob_move[move] = 0.2 / len(possible_moves)        
         possible_moves.append(self.MOVE_STAY)
-        
+
         cumulative_prob = 0
         for move in possible_moves:
             cumulative_prob += self.prob_move[move]
