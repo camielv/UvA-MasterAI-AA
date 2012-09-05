@@ -36,7 +36,7 @@ class Predator():
 
             if cumulative_prob > random_number:                
                 
-                print move 
+                #print move 
                 old_x, old_y = self.location
                 # determine the new location based on environment borders
                 new_x = (old_x + move[0]) % max_x
@@ -49,4 +49,4 @@ class Predator():
         return False
 
     def move(self, max_x, max_y, state):
-        self.randomMove(max_x, max_y, state)
+        return self.randomMove(max_x, max_y, state)

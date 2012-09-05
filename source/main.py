@@ -10,6 +10,9 @@ e.addPredator( (0,0) )
 iterations = 0
 
 # Start the simulation
+
 while not e.caught:
     e.run()
     iterations += 1
+
+print iterations

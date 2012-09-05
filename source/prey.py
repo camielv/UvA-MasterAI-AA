@@ -75,5 +75,5 @@ class Prey():
 
                 new_prey_location = (new_x, new_y)
 
-                return new_prey_location
+                self.location = new_prey_location
                 
