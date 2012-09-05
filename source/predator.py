@@ -42,5 +42,5 @@ class Predator():
                 self.location = (new_x, new_y)
                 break
 
-    def move(self):
-        pass
+    def move(self, max_x, max_y, state):
+        self.randomMove(max_x, max_y)

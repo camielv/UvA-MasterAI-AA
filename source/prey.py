@@ -32,7 +32,7 @@ class Prey():
     def getLocation(self):
         return self.location    
     
-    def move(self, location, max_x, max_y):
+    def move(self, max_x, max_y, state):
         """
         Function move(location, max_x, max_y) -> new_location
         
@@ -41,14 +41,39 @@ class Prey():
         """        
         random_number = random.random()
 
-        # find the move the prey takes 
+        possible_moves = list()
+        for move in [self.MOVE_UP, self.MOVE_DOWN, self.MOVE_RIGHT, self.MOVE_LEFT]:
+            old_x, old_y = self.location
+            # determine the new location based on environment borders
+            new_x = (old_x + move[0]) % max_x
+            new_y = (old_y + move[1]) % max_y
+
+            new_prey_location = (new_x, new_y)
+            # check if the new prey location coincides with a predator
+            for predator_location in state["predator"]:
+                if new_prey_location == predator_location:
+                    break
+            else:
+                # this beautiful pythonian for-else construction triggers the
+                # else if the for loop is ended normally (not by break). 
+                possible_moves.append(move)
+
+        # find the probability of each move based on the possible moves 
+        if len(possible_moves) > 0:
+            for move in possible_moves:
+                self.prob[move] = 0.2 / len(possible_moves)        
+        possible_moves.append(self.MOVE_STAY)
+        
         cumulative_prob = 0
-        for move in self.prob_move:
+        for move in possible_moves:
             cumulative_prob += self.prob_move[move]
             if random_number <= self.prob_move:
-                old_x, old_y = location
+                old_x, old_y = self.location
                 # determine the new location based on environment borders
                 new_x = (old_x + move[0]) % max_x
                 new_y = (old_y + move[1]) % max_y
+
+                new_prey_location = (new_x, new_y)
+
+                return new_prey_location
                 
-                return (new_x, new_y)
