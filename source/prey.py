@@ -61,7 +61,7 @@ class Prey():
         # find the probability of each move based on the possible moves 
         if len(possible_moves) > 0:
             for move in possible_moves:
-                self.prob[move] = 0.2 / len(possible_moves)        
+                self.prob_move[move] = 0.2 / len(possible_moves)        
         possible_moves.append(self.MOVE_STAY)
         
         cumulative_prob = 0
