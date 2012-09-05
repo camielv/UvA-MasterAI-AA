@@ -1,0 +1,54 @@
+# Autonomous Agents - 2012/2013
+# Team SuperAuke
+#
+# prey.py
+# Base class for the prey
+
+import random
+
+class Prey():
+
+    MOVE_UP = (0,1)
+    MOVE_DOWN = (0,-1)
+    MOVE_RIGHT = (1,0)
+    MOVE_LEFT = (-1,0)
+    MOVE_STAY = (0,0)
+    
+    prob_move = dict()    
+    location = (0,0)    
+    
+    def __init__(self, location):
+        """
+        Constructor defines movement probabilities
+        """
+        self.prob_move[self.MOVE_UP] = 0.05
+        self.prob_move[self.MOVE_DOWN] = 0.05
+        self.prob_move[self.MOVE_RIGHT] = 0.05
+        self.prob_move[self.MOVE_LEFT] = 0.05
+        self.prob_move[self.MOVE_STAY] = 0.80
+        
+        self.location = location
+    
+    def getLocation(self):
+        return self.location    
+    
+    def move(self, location, max_x, max_y):
+        """
+        Function move(location, max_x, max_y) -> new_location
+        
+        Determines the new location of the prey based on the old location and
+        the borders of the environment max_x,max_y.
+        """        
+        random_number = random.random()
+
+        # find the move the prey takes 
+        cumulative_prob = 0
+        for move in self.prob_move:
+            cumulative_prob += self.prob_move[move]
+            if random_number <= self.prob_move:
+                old_x, old_y = location
+                # determine the new location based on environment borders
+                new_x = (old_x + move[0]) % max_x
+                new_y = (old_y + move[1]) % max_y
+                
+                return (new_x, new_y)
