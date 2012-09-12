@@ -16,13 +16,13 @@ def policyEvaluation():
               
     discount = 0.8
 
-    state_dict = dict()
+    V = dict()
 
     for i in range(11):
         for j in range(11):
             for k in range(11):
                 for m in range(11):
-                    state_dict[(i,j,k,m)] = 0
+                    V[(i,j,k,m)] = 0
            
                         
     delta = 0.2   
@@ -31,31 +31,23 @@ def policyEvaluation():
     
     while delta > theta:
         delta = 0
-        for i in range(11):
-            for j in range(11):
-                for k in range(11):
-                    for m in range(11):
-                        # state representation
-                        s = (i,j,k,m)
-                        new_state_dict[s] = 0
-                        
-                        v = state_dict[s]                        
-                        
-                        V = 0
-                        # policy is dict, where a is the key
-                        # and the values are probabilities of the move a
-                        for a in policy:
-                            next_state = nextState( s, a )
-                            V += policy[a] *( reward( next_state ) + discount * state_dict[next_state] )
-                        new_state_dict[s] = V
-                        
-                        delta = max(delta, abs(v-V))
-        print new_state_dict[(5,5,5,5)]
-        print delta
-        
-                        
-        state_dict = copy.deepcopy(new_state_dict)
-    return state_dict
+        for s in V:
+            new_state_dict[s] = 0
+            
+            v = V[s]                        
+            
+            value = 0
+            # policy is dict, where a is the key
+            # and the values are probabilities of the move a
+            for a in policy:
+                next_state = nextState( s, a )
+                value += policy[a] *( reward( next_state ) + discount * V[next_state] )
+            new_state_dict[s] = value
+            
+            delta = max(delta, abs(v-value))
+
+        V = copy.deepcopy(new_state_dict)
+    return V
 
 def reward( state ):
     if (state[0],state[1]) == (state[2], state[3]):

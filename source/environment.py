@@ -46,6 +46,24 @@ class Environment:
             state['predator'].append( predator.getLocation() )
         
         return state
+        
+    def getReducedState( self ):
+        '''Returns the current state in a more concise manner: uses only 
+        relative position of the predator with respect to the prey. '''
+        prey_x, prey_y = self.prey.getLocation() 
+        width =  self.getWidth()            
+        height = self.getHeight()        
+        
+        state = dict()
+        state['predator'] = list()
+        for predator in self.predators:
+            
+            x,y = predator.getLocation()            
+            
+            dist_x = (x-prey_x) % width
+            dist_y = (x-prey_y) % height
+            
+            state['predator'].append( (dist_x, dist_y) )
     
     def run( self ):
         '''Performs one step of the simulation.'''
