@@ -22,7 +22,7 @@ class Predator():
     def getLocation( self ):
         return self.location
     
-    def randomMove( self, max_x, max_y, state ):
+    def randomMove( self, max_x, max_y ):
         random_number = random.random()
         prob_move = {self.MOVE_UP: 0.2,
                      self.MOVE_DOWN: 0.2,
@@ -44,10 +44,27 @@ class Predator():
                 new_y = (old_y + move[1]) % max_y
                 
                 self.location = (new_x, new_y)
-                
-                if self.location == (state[0],state[1]):
-                    return True
-        return False
 
-    def move(self, max_x, max_y, state):
-        return self.randomMove(max_x, max_y, state)
+    def hypoMoveReduced( self, max_x, max_y, action, state ):
+        ''' Update the location based on a given action. '''
+        d_x, d_y  = action
+        old_x, old_y = state
+
+        if old_x < 5:
+            new_x = (old_x + action[0]) % max_x
+        elif old_x > 5:
+            new_x = (old_x - action[0]) % max_x
+        elif old_x == 5:
+            new_x = min((old_x - action[0]) % max_x, (old_x + action[0]) % max_x)
+            
+        if old_y < 5:
+            new_y = (old_y + action[0]) % max_y
+        elif old_y > 5:
+            new_y = (old_y - action[0]) % max_y
+        elif old_y == 5:
+            new_y = min((old_y - action[0]) % max_y, (old_y + action[0]) % max_y)
+
+        newstate = (new_x, new_y)
+        return newstate
+
+        

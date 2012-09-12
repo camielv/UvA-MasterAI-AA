@@ -29,18 +29,7 @@ class Environment:
     def getHeight( self ):
         '''Returns the height of the environment.'''
         return self.height
-    
-    def getState( self ):
-        '''Returns the current environment state.'''
-        # Create state
-        predator_x, predator_y = self.predator.getLocation()
-        prey_x, prey_y = self.prey.getLocation()
-        
-        # Retrieve predator positions
-        state = (predator_x, predator_y, prey_x, prey_y)
-        
-        return state
-        
+
     def policyEvaluation(self):
        
         # Define the set of actions
@@ -50,7 +39,7 @@ class Environment:
         discount = 0.8
 
         # Define the set of all states
-        S = set( [ (i,j,k,m) for i in range(self.width) for j in range(self.height) for k in range(self.width) for m in range(self.height) ] )
+        S = set( [ (i,j) for i in range(self.width) for j in range(self.height) ] )
 
         # Define the policy (currently random: 5 actions per state, each prob(a) = 0.2)
         policy = dict()
@@ -95,7 +84,7 @@ class Environment:
 
     def reward( self, state ):
         
-        if (state[0],state[1]) == (state[2], state[3]):
+        if (state[0],state[1]) == (0,0):
             return 10
         return 0
 
@@ -104,34 +93,48 @@ class Environment:
         Returns a tuple containing a list of all possible next states and a
         dictionary containing the transition probabilities of those next states.
         '''
-        self.predator
-        
         # Determine the new location based on environment borders
-        new_predator_x = (old_predator_x + action[0]) % self.width
-        new_predator_y = (old_predator_y + action[1]) % self.height
+        new_state = self.predator.hypoMoveReduced(self.width, self.height, action, state)
        
-        moves = self.prey.getPossibleMoves(  self.getWidth(), self.height, (new_predator_x, new_predator_y, state[2], state[3]) )
+        moves = self.prey.getPossibleMovesReduced( self.getWidth(), self.height, new_state )
 
         next_states = list()
         P = dict()
+
         for move in moves:
             # Determine the next state based on the move of the prey
-            next_state = self.prey.hypoMove(self.width, self.height, (new_predator_x, new_predator_y, state[2], state[3]), move)
+            next_state = self.prey.hypoMoveReduced(self.width, self.height, new_state, move)
             next_states.append(next_state)
             P[next_state] = moves[move]
         
         return next_states, P
+
+    def getReducedState( self ):
+        '''Returns the current state in a more concise manner: uses only 
+        relative position of the predator with respect to the prey. '''
+        prey_x, prey_y = self.prey.getLocation() 
+        width =  self.width            
+        height = self.height        
+            
+        x,y = self.predator.getLocation()            
+            
+        dist_x = min((x-prey_x) % width, (x+prey_x) % width)
+        dist_y = min((y-prey_y) % width, (y+prey_y) % width)
+            
+        state = (dist_x, dist_y)
+
+        return state
             
     
     def run( self ):
         '''Performs one step of the simulation.'''
         # Retrieve the state
-        state = self.getState()
+        state = self.getReducedState()
         
         # Update predator positions
-        if self.predator.move( self.width, self.height, state ):
+        if self.predator.moveReduced( self.width, self.height, state, self.preyLocation ):
             self.caught = True
             return
             
         # Update prey position
-        self.prey.move( self.width, self.height, state )
+        self.prey.moveReduced( self.width, self.height, state, self.preyLocation )
