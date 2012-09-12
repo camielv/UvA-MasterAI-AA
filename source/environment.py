@@ -74,8 +74,7 @@ class Environment:
             delta = 0
             
             for s in S:
-                new_V[s] = 0
-                v = V[s]                        
+                new_V[s] = 0                 
                 
                 for a in actions:
                     # Calculate all next states and their probabilities
@@ -85,7 +84,7 @@ class Environment:
                         new_V[s] += policy[(s,a)] * P[next_state] * ( self.reward( next_state ) + discount * V[next_state] )
                 
                 # Compute the error
-                delta = max( delta, abs( v - new_V[s] ) )
+                delta = max( delta, abs( V[s] - new_V[s] ) )
 
             # Store the new values
             V = deepcopy(new_V)
@@ -109,13 +108,15 @@ class Environment:
         new_predator_x = (old_predator_x + action[0]) % self.width
         new_predator_y = (old_predator_y + action[1]) % self.height
        
-        moves = self.prey.getPossibleMoves(  self.getWidth(), self.height, (new_predator_x, new_predator_y, state[2], state[3]) )
-
+        temp_state = (new_predator_x, new_predator_y, state[2], state[3])
+        moves = self.prey.getPossibleMoves( self.getWidth(), self.height, temp_state )
+        
         next_states = list()
         P = dict()
+        
         for move in moves:
             # Determine the next state based on the move of the prey
-            next_state = self.prey.hypoMove(self.width, self.height, (new_predator_x, new_predator_y, state[2], state[3]), move)
+            next_state = self.prey.hypoMove(self.width, self.height,temp_state, move)
             next_states.append(next_state)
             P[next_state] = moves[move]
         

@@ -84,15 +84,14 @@ class Prey():
     def getPossibleMoves(self, max_x, max_y, state):
         possible_moves = dict()
         for move in [self.MOVE_UP, self.MOVE_DOWN, self.MOVE_RIGHT, self.MOVE_LEFT]:
-            old_x, old_y = self.location
+            old_x, old_y = state[2], state[3]
             # determine the new location based on environment borders
             new_x = (old_x + move[0]) % max_x
             new_y = (old_y + move[1]) % max_y
 
-            new_prey_location = (new_x, new_y)
             # check if the new prey location coincides with a predator
-            if new_prey_location == (state[0], state[1]):
-                break
+            if (new_x,new_y) == (state[0], state[1]):
+                continue
             else:
                 # this beautiful pythonian for-else construction triggers the
                 # else if the for loop is ended normally (not by break). 
@@ -108,13 +107,12 @@ class Prey():
     def getPossibleMovesReduced(self, max_x, max_y, state):
         possible_moves = dict()
         for move in [self.MOVE_UP, self.MOVE_DOWN, self.MOVE_RIGHT, self.MOVE_LEFT]:
-            old_x, old_y = self.location
+            
             # determine the new location based on environment borders
             new_state = self.hypoMoveReduced(max_x, max_y, move, state)
 
             new_x, new_y = new_state
 
-            new_prey_location = (new_x, new_y)
             # check if the new prey location coincides with a predator
             if new_state == (0,0):
                 continue

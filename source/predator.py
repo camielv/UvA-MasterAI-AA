@@ -53,7 +53,7 @@ class Predator():
         if old_x < 0:
             new_x = ((old_x + 5 + action[0]) % max_x)-5
         elif old_x > 0:
-            new_x = ((old_x - action[0]) % max_x)-5
+            new_x = ((old_x + 5 - action[0]) % max_x)-5
         elif old_x == 0:
             new_x = -action[0]
             
@@ -64,7 +64,6 @@ class Predator():
         elif old_y == 0:
             new_y = -action[1]
 
-        newstate = (new_x, new_y)
-        return newstate
+        return (new_x, new_y)
 
         
