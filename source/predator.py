@@ -30,6 +30,7 @@ class Predator():
                      self.MOVE_LEFT: 0.2,
                      self.MOVE_STAY: 0.2}
         cumulative_prob = 0 
+        
         for move in prob_move:
 
             cumulative_prob += prob_move[move]
@@ -44,7 +45,7 @@ class Predator():
                 
                 self.location = (new_x, new_y)
                 
-                if self.location == state['prey']:
+                if self.location == (state[0],state[1]):
                     return True
         return False
 
