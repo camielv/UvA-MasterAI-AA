@@ -48,7 +48,7 @@ def policyEvaluation():
                 next_states, P = nextStates( s, a )
                 
                 for next_state in next_states:
-                    new_V[s] += policy(s,a) * P[next_state] * ( reward( next_state ) + discount * V[next_state] )
+                    new_V[s] += policy([s,a)] * P[next_state] * ( reward( next_state ) + discount * V[next_state] )
             
             # Compute the error
             delta = max( delta, abs( v - new_V[s] ) )
@@ -64,22 +64,18 @@ def reward( state ):
         return 10
     return 0
 
-def nextStates( state, action ):
+def nextStates( state, action, prey ):
     '''
     Returns a tuple containing a list of all possible next states and a
     dictionary containing the transition probabilities of those next states.
     '''
-    old_x, old_y = (state[0], state[1])
+    old_predator_x, old_predator_y = (state[0], state[1])
     
     # determine the new location based on environment borders
-    new_x = (old_x + action[0]) % 11
-    new_y = (old_y + action[1]) % 11
+    new_predator_x = (old_predator_x + action[0]) % self.getWidth()
+    new_predator_y = (old_predator_y + action[1]) % self.getHeight()
+   
+    moves = prey.getPossibleMoves(  self.getWidth(), self.getHeight(), (new_predator_x, new_predator_y, state[2], state[3]) )
     
     return [(new_x, new_y, state[2],state[3])], { (new_x, new_y, state[2],state[3]) : 1}
         
-def policy( state, action ):
-    '''
-    Returns the probability of taking the given action in the given state, 
-    according to this policy.
-    '''
-    return 0.2
