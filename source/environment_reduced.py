@@ -39,8 +39,8 @@ class Environment:
         discount = 0.8
 
         # Define the set of all states
-        S = set( [ (i,j) for i in range(self.width) for j in range(self.height) ] )
-
+        S = set( [ (i,j) for i in range(-(self.width/2), self.width/2 + 1) for j in range(-(self.height/2), self.height/2) ] )
+        print S
         # Define the policy (currently random: 5 actions per state, each prob(a) = 0.2)
         policy = dict()
         for s in S:
@@ -72,6 +72,9 @@ class Environment:
                     next_states, P = self.nextStates( s, a )
                     
                     for next_state in next_states:
+    
+                        print V[next_state]
+   
                         new_V[s] += policy[(s,a)] * P[next_state] * ( self.reward( next_state ) + discount * V[next_state] )
                 
                 # Compute the error
@@ -97,17 +100,18 @@ class Environment:
         new_state = self.predator.hypoMoveReduced(self.width, self.height, action, state)
        
         moves = self.prey.getPossibleMovesReduced( self.getWidth(), self.height, new_state )
-
+        
         next_states = list()
         P = dict()
 
         for move in moves:
             # Determine the next state based on the move of the prey
-            next_state = self.prey.hypoMoveReduced(self.width, self.height, new_state, move)
+            next_state = self.prey.hypoMoveReduced(self.width, self.height, move, new_state)
             next_states.append(next_state)
             P[next_state] = moves[move]
-        
+
         return next_states, P
+    
 
     def getReducedState( self ):
         '''Returns the current state in a more concise manner: uses only 
@@ -138,3 +142,7 @@ class Environment:
             
         # Update prey position
         self.prey.moveReduced( self.width, self.height, state, self.preyLocation )
+
+if __name__=="__main__":
+    e = Environment()
+    print e.policyEvaluation()

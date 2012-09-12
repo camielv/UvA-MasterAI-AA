@@ -8,7 +8,6 @@ from prey import Prey
 from copy import deepcopy
 
 class Environment:
-    
     '''
     Creates an instance of the environment. Default an eleven by eleven grid
     is used. The default position for the prey is (5,5).
@@ -44,7 +43,7 @@ class Environment:
     def policyEvaluation(self):
        
         # Define the set of actions
-        actions = set( [ (0,0),(1,0), (0,1), (-1,0), (0,-1) ] )
+        actions = set( [ (0,0), (1,0), (0,1), (-1,0), (0,-1) ] )
                   
         # Define the discount
         discount = 0.8
@@ -104,7 +103,7 @@ class Environment:
         Returns a tuple containing a list of all possible next states and a
         dictionary containing the transition probabilities of those next states.
         '''
-        self.predator
+        old_predator_x, old_predator_y = (state[0], state[1])
         
         # Determine the new location based on environment borders
         new_predator_x = (old_predator_x + action[0]) % self.width

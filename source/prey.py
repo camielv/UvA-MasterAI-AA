@@ -60,21 +60,22 @@ class Prey():
     def hypoMoveReduced( self, max_x, max_y, action, state ):
         ''' Update the location based on a given action. '''
         d_x, d_y  = action
+        
         old_x, old_y = state
 
-        if old_x < 5:
-            new_x = (old_x - action[0]) % max_x
-        elif old_x > 5:
-            new_x = (old_x + action[0]) % max_x
-        elif old_x == 5:
-            new_x = min((old_x - action[0]) % max_x, (old_x + action[0]) % max_x)
+        if old_x < 0:
+            new_x = ((old_x + 5 - action[0]) % max_x)-5
+        elif old_x > 0:
+            new_x = ((old_x + 5 + action[0]) % max_x)-5
+        elif old_x == 0:
+            new_x = action[0]
             
-        if old_y < 5:
-            new_y = (old_y - action[0]) % max_y
-        elif old_y > 5:
-            new_y = (old_y + action[0]) % max_y
-        elif old_y == 5:
-            new_y = min((old_y - action[0]) % max_y, (old_y + action[0]) % max_y)
+        if old_y < 0:
+            new_y = ((old_y + 5 - action[1]) % max_y)-5
+        elif old_y > 0:
+            new_y = ((old_y + 5 + action[1]) % max_y)-5
+        elif old_y == 0:
+            new_y = action[1]
 
         newstate = (new_x, new_y)
         return newstate
@@ -116,17 +117,14 @@ class Prey():
             new_prey_location = (new_x, new_y)
             # check if the new prey location coincides with a predator
             if new_state == (0,0):
-                break
+                continue
             else:
-                # this beautiful pythonian for-else construction triggers the
-                # else if the for loop is ended normally (not by break). 
                 possible_moves[move] = 1
 
+        
         # find the probability of each move based on the possible moves 
-        if len(possible_moves) > 0:
-            for move in possible_moves:
-                possible_moves[move] = 0.2 / len(possible_moves)        
+        for move in possible_moves:
+            possible_moves[move] = 0.2 / len(possible_moves)
         possible_moves[self.MOVE_STAY] = 0.8
-
         return possible_moves
 

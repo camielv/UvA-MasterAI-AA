@@ -50,19 +50,19 @@ class Predator():
         d_x, d_y  = action
         old_x, old_y = state
 
-        if old_x < 5:
-            new_x = (old_x + action[0]) % max_x
-        elif old_x > 5:
-            new_x = (old_x - action[0]) % max_x
-        elif old_x == 5:
-            new_x = min((old_x - action[0]) % max_x, (old_x + action[0]) % max_x)
+        if old_x < 0:
+            new_x = ((old_x + 5 + action[0]) % max_x)-5
+        elif old_x > 0:
+            new_x = ((old_x - action[0]) % max_x)-5
+        elif old_x == 0:
+            new_x = -action[0]
             
-        if old_y < 5:
-            new_y = (old_y + action[0]) % max_y
-        elif old_y > 5:
-            new_y = (old_y - action[0]) % max_y
-        elif old_y == 5:
-            new_y = min((old_y - action[0]) % max_y, (old_y + action[0]) % max_y)
+        if old_y < 0:
+            new_y = ((old_y + 5 + action[1]) % max_y)-5
+        elif old_y > 0:
+            new_y = ((old_y + 5 - action[1]) % max_y)-5
+        elif old_y == 0:
+            new_y = -action[1]
 
         newstate = (new_x, new_y)
         return newstate
