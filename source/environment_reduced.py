@@ -33,7 +33,7 @@ class Environment:
     def policyEvaluation(self):
        
         # Define the set of actions
-        actions = set( [ (0,0),(1,0), (0,1), (-1,0), (0,-1) ] )
+        actions = set( [ (0,0), (1,0), (0,1), (-1,0), (0,-1) ] )
                   
         # Define the discount
         discount = 0.8
@@ -65,8 +65,7 @@ class Environment:
             
             for s in S:
                 new_V[s] = 0
-                v = V[s]                        
-                
+                                     
                 for a in actions:
                     # Calculate all next states and their probabilities
                     next_states, P = self.nextStates( s, a )
@@ -75,7 +74,7 @@ class Environment:
                         new_V[s] += policy[(s,a)] * P[next_state] * ( self.reward( next_state ) + discount * V[next_state] )
                 
                 # Compute the error
-                delta = max( delta, abs( v - new_V[s] ) )
+                delta = max( delta, abs( V[s] - new_V[s] ) )
 
             # Store the new values
             V = deepcopy(new_V)
@@ -119,8 +118,8 @@ class Environment:
             
         x,y = self.predator.getLocation()            
             
-        dist_x = min((x-prey_x) % width, (x+prey_x) % width)
-        dist_y = min((y-prey_y) % height, (y+prey_y) % height)
+        dist_x = min( (x-prey_x) % width, (x+prey_x) % width )
+        dist_y = min( (y-prey_y) % height, (y+prey_y) % height )
             
         state = (dist_x, dist_y)
 
