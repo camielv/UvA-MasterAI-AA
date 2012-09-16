@@ -122,6 +122,65 @@ class Environment:
         
         return next_states, P
             
+            
+    def valueIteration( self ):
+        # Define the set of actions
+        actions = set( [ (0,0), (1,0), (0,1), (-1,0), (0,-1) ] )
+                  
+        # Define the discount
+        discount = 0.8
+
+        # Define the set of all states
+        S = set( [ (i,j,k,m) for i in range(self.width) for j in range(self.height) for k in range(self.width) for m in range(self.height) ] )
+
+        # Define the policy (currently random: 5 actions per state, each prob(a) = 0.2)
+        policy = dict()
+        for s in S:
+            for a in actions:
+                policy[(s,a)] = 0.2
+        
+        # Define delta and theta
+        delta = 0.2   
+        theta = 0.01    
+        
+        # Define dictionaries for the Value-function
+        V = dict()    
+        new_V = dict()    
+        
+        # Initialize the Value function to zero
+        for s in S: 
+            V[s] = 0    
+        print V[(4,1,4,1)]
+        
+        # Policy evaluation
+        while delta > theta:
+            delta = 0
+            
+            for s in S:
+                # skip all terminal states
+                if s[0] == s[2] and s[1] == s[3]:
+                    continue
+                new_V[s] = 0                 
+                
+                # Find the best value based on the action with the highest reward
+                highest_value = 0
+                for a in actions:
+                    next_states, P = self.nextStates( s, a )
+                    
+                    for next_state in next_states:
+                        value = P[next_state] * ( self.reward( next_state ) + discount * V[next_state] )
+                        if value > highest_value:
+                            highest_value = value
+                            
+                new_V[s] = highest_value        
+                # Compute the error
+                delta = max( delta, abs( V[s] - new_V[s] ) )
+
+            # Store the new values
+            V = deepcopy(new_V)
+            
+        return V
+        
     
     def run( self ):
         '''Performs one step of the simulation.'''
