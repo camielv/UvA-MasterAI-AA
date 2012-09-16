@@ -40,7 +40,19 @@ class Environment:
 
         # Define the set of all states
         S = set( [ (i,j) for i in range(-(self.width/2), self.width/2 + 1) for j in range(-(self.height/2), self.height/2 + 1) ] )
-
+        
+        # Define dictionaries for the Value-function
+        V = dict()    
+        new_V = dict()    
+        
+        # Initialize the Value function to zero
+        for s in S: 
+            V[s] = 0            
+        
+        # Remove terminal states
+        terminal_states = set( [ (0,0) ] )
+        S -= terminal_states
+        
         # Define the policy (currently random: 5 actions per state, each prob(a) = 0.2)
         policy = dict()
         for s in S:
@@ -49,15 +61,7 @@ class Environment:
         
         # Define delta and theta
         delta = 0.2   
-        theta = 0.01    
-        
-        # Define dictionaries for the Value-function
-        V = dict()    
-        new_V = dict()    
-        
-        # Initialize the Value function to zero
-        for s in S: 
-            V[s] = 0    
+        theta = 0.00001    
         
         # Policy evaluation
         while delta > theta:
@@ -70,8 +74,11 @@ class Environment:
                     # Calculate all next states and their probabilities
                     next_states, P = self.nextStates( s, a )
                     
-                    for next_state in next_states:  
-                        new_V[s] += policy[(s,a)] * P[next_state] * ( self.reward( next_state ) + discount * V[next_state] )
+                    for next_state in next_states:
+                        if next_state in terminal_states:
+                            new_V[s] += self.reward( next_state ) * policy[(s,a)] * P[next_state] 
+                        else:
+                            new_V[s] += policy[(s,a)] * P[next_state] * ( self.reward( next_state ) + discount * V[next_state] )
                 
                 # Compute the error
                 delta = max( delta, abs( V[s] - new_V[s] ) )
