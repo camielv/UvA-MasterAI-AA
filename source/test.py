@@ -5,12 +5,10 @@ Created on Sat Sep 15 15:13:54 2012
 @author: Steven
 """
 
-from copy import deepcopy
-
 size = 11
 discount = 0.8
 
-theta = 0.001
+theta = 0.0001
 delta = 1
 
 S = set()
@@ -90,10 +88,12 @@ for s in S:
 
 # Define delta and theta
 delta = 0.2   
-theta = 0.001    
+theta = 0    
 
 step = False
 view = False
+i = 0
+
 # Policy evaluation
 while delta > theta:
     delta = 0
@@ -118,6 +118,10 @@ while delta > theta:
 
     if step: step = int( raw_input( 'Sweep done, continue stepping?' ) )
     if view: view = int( raw_input( 'Sweep done, continue viewing?' ) )
+
     # Store the new values
     for s in S:
         V[s] = new_V[s]
+        
+    print 'Iteration', i
+    i += 1
