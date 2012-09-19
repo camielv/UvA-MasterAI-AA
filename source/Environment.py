@@ -13,13 +13,10 @@ class Environment:
     Creates an instance of the environment. Default an eleven by eleven grid
     is used. The default position for the prey is (5,5).
     '''
-    def __init__( self, width = 11, height = 11, preyLocation = ( 5, 5), 
-                 predatorLocation = ( 0, 0 ) ):
+    def __init__( self, width=11, height=11 ):
         self.width  = width
         self.height = height
-        S,terminal_states = self.getStates()        
-        self.S = S
-        self.terminal_states = terminal_states
+        self.S,self.terminal_states = self.getStates()        
                 
     def getState( self ):
         '''Returns the current environment state.'''
@@ -28,7 +25,8 @@ class Environment:
         
     def getStates(self):
         '''
-        Gets the entire statespace in two sets, the first containing the non-terminal states and the second containing terminal states.
+        Gets the entire statespace in two sets, the first containing the non-
+        terminal states and the second containing terminal states.
         '''
         raise NotImplementedError
 
@@ -98,15 +96,16 @@ class Environment:
             V[s] = 0
           
         policy = self.predator.policy # Returns a dict
+
         # Define delta and theta
         delta = 0.2  
         theta = 0.00 
-        
+        discount = 0.7
+        new_V = dict()
+            
         # Policy evaluation
         while delta > theta:
             delta = 0
-            new_V = dict()
-            discount = 0.8
             for s in self.S:
                 new_V[s] = 0                     
                 
