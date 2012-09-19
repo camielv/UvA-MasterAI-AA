@@ -65,7 +65,7 @@ class Prey():
 
         return (s[0], s[1], new_x, new_y)
 
-    def performActionReduced( self, a, s ):
+    def performActionReduced( self, s, a ):
         ''' 
         Update the reduced state based on a given a. 
         '''
@@ -76,16 +76,16 @@ class Prey():
         max_x = self.environment.width
         max_y = self.environment.height
 
-        if old_x < 0:
+        if old_x > 0:
             new_x = ((old_x + 5 - a[0]) % max_x)-5
-        elif old_x > 0:
+        elif old_x < 0:
             new_x = ((old_x + 5 + a[0]) % max_x)-5
         elif old_x == 0:
             new_x = a[0]
             
-        if old_y < 0:
+        if old_y > 0:
             new_y = ((old_y + 5 - a[1]) % max_y)-5
-        elif old_y > 0:
+        elif old_y < 0:
             new_y = ((old_y + 5 + a[1]) % max_y)-5
         elif old_y == 0:
             new_y = a[1]
@@ -127,15 +127,16 @@ class Prey():
 
         for a in self.actions:            
             # determine the new location based on environment borders
-            s_prime = self.performActionReduced( a, s )
+            s_prime = self.performActionReduced( s, a )
 
             # check if the new prey location coincides with a predator
-            if s_prime not in self.environment.terminal_states:
+            if not s_prime in self.environment.terminal_states:
                 possible_states[s_prime] = 1
         
         # find the probability of each move based on the possible moves 
+        p_action = 0.2 / (len(possible_states) -1)
         for possible_s in possible_states:
-            possible_states[possible_s] = 0.2 / len(possible_states)
+            possible_states[possible_s] = p_action
         possible_states[s] = 0.8
         
         return possible_states
