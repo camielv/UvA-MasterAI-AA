@@ -10,7 +10,7 @@
 
 from EnvironmentNormal import EnvironmentNormal
 from EnvironmentReduced import EnvironmentReduced
-from interface import interface
+from interface import Interface
 
 def main():
     ''' Main function running single agent planning and the GUI '''
@@ -25,10 +25,17 @@ def main():
     # Decode the state
     pred_x, pred_y, prey_x, prey_y = s
 
+    print "Start simulation"
     # If the prey is not caught then run.
     while( not( (pred_x, pred_y) == (prey_x, prey_y) ) ):
         # Run a step
         E.run()
+
+        # If reload key 'r' is pressed restart
+        if GUI.getReload():
+            print "Reload simulation"
+            E = EnvironmentNormal()
+
         s = E.getState()
 
         pred_x, pred_y, prey_x, prey_y = s
@@ -36,6 +43,9 @@ def main():
         # Set new locations in GUI
         GUI.setPredator( (pred_x, pred_y) )
         GUI.setPrey( (prey_x, prey_y) )
+
+        if GUI.getStatus():
+            break
 
     # Wait for exit event in GUI.
     GUI.join()

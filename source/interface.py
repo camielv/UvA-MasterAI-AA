@@ -25,6 +25,8 @@ class Interface( Thread ):
         self.size = size
         self.offset = 100
         self.refresh = 0.2
+        self.quit = False
+        self.again = False
         self.resolution = ( self.offset + size[0] * 50, self.offset + size[1] * 50 )
         self.screen = pygame.display.set_mode( self.resolution )
         pygame.display.set_caption( 'Autonomous Agents: Predator vs. Prey' )
@@ -77,36 +79,24 @@ class Interface( Thread ):
         self.prey_rect.top  = (self.offset / 2) + ( (location[1] % self.size[1]) * 51) + 1
         time.sleep( self.refresh )
 
+    def getStatus( self ):
+        ''' Returns the state of the GUI, if quitted it returns True '''
+        return self.quit
+
+    def getReload( self ):
+        again = self.again
+        self.again = False
+        return again
+
     def run( self ):
         ''' Updates the screen and checks for quit events '''
         while( 1 ):
             for e in pygame.event.get():
                 if ( ( e.type == QUIT ) ):
+                    self.quit = True
                     sys.exit()
+                elif ( ( e.type == KEYDOWN ) and ( e.key == K_r ) ):
+                    self.again = True
 
             self.__update()
             time.sleep( self.refresh / 2 )
-
-
-# DEMONSTRATION
-if( __name__ == '__main__' ):
-    from EnvironmentNormal import EnvironmentNormal
-    E = EnvironmentNormal()
-    s = E.getState()
-
-    GUI = Interface( (11, 11), s )
-    GUI.start()
-
-    pred_x, pred_y, prey_x, prey_y = s
-
-    while( not( (pred_x, pred_y) == (prey_x, prey_y) ) ):
-        E.run()
-        s = E.getState()
-
-        pred_x, pred_y, prey_x, prey_y = s
-
-        GUI.setPredator( (pred_x, pred_y) )
-        GUI.setPrey( (prey_x, prey_y) )
-        time.sleep( 1 )
-    # Wait for GUI to end
-    GUI.join()
