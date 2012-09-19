@@ -16,8 +16,8 @@ class Environment:
     def __init__( self, width=11, height=11 ):
         self.width  = width
         self.height = height
-        self.S, self.terminal_states = self.getStates()        
-
+        self.S,self.terminal_states = self.getStates()        
+                
     def getState( self ):
         '''Returns the current environment state.'''
         
@@ -44,7 +44,7 @@ class Environment:
         policy = self.predator.policy
 
         # Define delta and theta
-        delta = 0.2 
+        delta = 0.2
         theta = 0   
         discount = 0.8
         # Keep track of the number of iterations
