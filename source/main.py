@@ -1,3 +1,13 @@
+# Assignment:   Single Agent Planning
+# Course:       Autonomous Agents 2012-2013
+# Education:    Master Artificial Intelligence
+# By:           Steven Laan         6036031
+#               Auke Wiggers        6036163
+#               Camiel Verschoor    6229298
+#
+# File:         main.py
+# Description:  This file runs our implementation of the MDP.
+
 from EnvironmentNormal import EnvironmentNormal
 from EnvironmentReduced import EnvironmentReduced
 from interface import interface
@@ -33,29 +43,3 @@ def main():
 # If this is the main script run main function
 if( __name__ == '__main__' ):
     main()
-
-
-'''
-Old shit!!!!!!!!!!!!!!!
-# Counter for number of iterations
-total = 0
-N = 100
-
-for i in xrange( N ):
-
-    iterations = 0
-    # Create the environment
-    e = environment.Environment()
-    
-    # Add the first predator
-    e.addPredator( (0,0) )
-    iterations = 0    
-    
-    # Perform simulation
-    while not e.caught:
-        e.run()
-        iterations += 1
-    total += iterations
-
-print 'Averge number of iterations:', total / float( N )
-''' 
