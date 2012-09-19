@@ -25,6 +25,7 @@ class Interface( Thread ):
         self.size = size
         self.offset = 100
         self.refresh = 0.2
+        self.quit = False
         self.resolution = ( self.offset + size[0] * 50, self.offset + size[1] * 50 )
         self.screen = pygame.display.set_mode( self.resolution )
         pygame.display.set_caption( 'Autonomous Agents: Predator vs. Prey' )
@@ -77,12 +78,18 @@ class Interface( Thread ):
         self.prey_rect.top  = (self.offset / 2) + ( (location[1] % self.size[1]) * 51) + 1
         time.sleep( self.refresh )
 
+    def getStatus( self ):
+        ''' Returns the state of the GUI, if quitted it returns True '''
+        return self.quit
+
     def run( self ):
         ''' Updates the screen and checks for quit events '''
         while( 1 ):
             for e in pygame.event.get():
                 if ( ( e.type == QUIT ) ):
+                    self.quit = True
                     sys.exit()
+                print e.type
 
             self.__update()
             time.sleep( self.refresh / 2 )
