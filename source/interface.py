@@ -90,12 +90,12 @@ class Interface( Thread ):
 
     def run( self ):
         ''' Updates the screen and checks for quit events '''
-        while( 1 ):
+        while 1 :
             for e in pygame.event.get():
-                if ( ( e.type == QUIT ) ):
+                if e.type == QUIT:
                     self.quit = True
                     sys.exit()
-                elif ( ( e.type == KEYDOWN ) and ( e.key == K_r ) ):
+                elif e.type == KEYDOWN and e.key == K_r:
                     self.again = True
 
             self.__update()
