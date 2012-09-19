@@ -8,121 +8,126 @@ import random
 
 class Prey():
 
-    MOVE_UP = (-1,0)
-    MOVE_DOWN = (1,0)
-    MOVE_RIGHT = (0,1)
-    MOVE_LEFT = (0,-1)
-    MOVE_STAY = (0,0)
+    ACTION_UP = (-1,0)
+    ACTION_DOWN = (1,0)
+    ACTION_RIGHT = (0,1)
+    ACTION_LEFT = (0,-1)
+    ACTION_STAY = (0,0)
     
-    location = (0,0)    
+    location = (0,0)  
+    actions = set([ACTION_UP, ACTION_DOWN, ACTION_RIGHT, ACTION_LEFT, ACTION_STAY])
     
-    def __init__(self, location):
+    def __init__(self, environment, location):
         """
         Constructor defines movement probabilities
         """
+        self.environment = environment
         self.location = location
     
     def getLocation(self):
         return self.location    
     
-    def move(self, max_x, max_y, state):
+    def simulateAction(self, s, reduced):
         """
         Function move(location, max_x, max_y) -> new_location
         
         Determines the new location of the prey based on the old location and
         the borders of the environment max_x,max_y.
         """        
-        possible_moves = self.getPossibleMoves(max_x, max_y, state)
-
+ 
+        # Determine which function should be used based on a boolean 'reduced'.
+        # If the boolean is true, the reduced statespace will be used. 
+        if not reduced:
+            getPossibleActions = self.getPossibleActions
+            performAction = self.performAction
+        else:
+            getPossibleActions = self.getPossibleActionsReduced
+            performAction = self.performActionReduced
+        
+        possible_actions = getPossibleActions( s ) 
+ 
         # Between 0 and 1, used to determine the current action
         random_number = random.random()
         
         cumulative_prob = 0
-        for move in possible_moves:
-            cumulative_prob += self.prob_move[move]
-            if random_number <= self.prob_move:
-                old_x, old_y = self.location
-                # determine the new location based on environment borders
-                new_x = (old_x + move[0]) % max_x
-                new_y = (old_y + move[1]) % max_y
-
-                new_prey_location = (new_x, new_y)
-
-                self.location = new_prey_location
+        for a in possible_actions:
+            cumulative_prob +=  possible_actions[a]
+            if random_number <= cumulative_prob:
+                return performAction( s, a )
                 
-    def hypoMove(self, max_x, max_y, state, move):
-        old_x, old_y = state[2], state[3]        
-        new_x = (old_x + move[0]) % max_x
-        new_y = (old_y + move[1]) % max_y
+    def performAction(self, s, a):
+        '''
+        Perform a move given the current state        
+        '''        
+        old_x, old_y = s[2], s[3]        
+        new_x = (old_x + a[0]) % self.environment.width
+        new_y = (old_y + a[1]) % self.environment.height
 
-        return (state[0], state[1], new_x, new_y)
+        return (s[0], s[1], new_x, new_y)
 
-    def hypoMoveReduced( self, max_x, max_y, action, state ):
-        ''' Update the location based on a given action. '''
-        d_x, d_y  = action
+    def performActionReduced( self, a, s ):
+        ''' 
+        Update the reduced state based on a given a. 
+        '''
+        d_x, d_y  = a
         
-        old_x, old_y = state
+        old_x, old_y = s
+
+        max_x = self.environment.width
+        max_y = self.environment.height
 
         if old_x < 0:
-            new_x = ((old_x + 5 - action[0]) % max_x)-5
+            new_x = ((old_x + 5 - a[0]) % max_x)-5
         elif old_x > 0:
-            new_x = ((old_x + 5 + action[0]) % max_x)-5
+            new_x = ((old_x + 5 + a[0]) % max_x)-5
         elif old_x == 0:
-            new_x = action[0]
+            new_x = a[0]
             
         if old_y < 0:
-            new_y = ((old_y + 5 - action[1]) % max_y)-5
+            new_y = ((old_y + 5 - a[1]) % max_y)-5
         elif old_y > 0:
-            new_y = ((old_y + 5 + action[1]) % max_y)-5
+            new_y = ((old_y + 5 + a[1]) % max_y)-5
         elif old_y == 0:
-            new_y = action[1]
+            new_y = a[1]
 
-        newstate = (new_x, new_y)
-        return newstate
+        s_prime = (new_x, new_y)
 
+        return s_prime
 
-    def getPossibleMoves(self, max_x, max_y, state):
-        possible_moves = dict()
-        for move in [self.MOVE_UP, self.MOVE_DOWN, self.MOVE_RIGHT, self.MOVE_LEFT]:
-            old_x, old_y = state[2], state[3]
-            # determine the new location based on environment borders
-            new_x = (old_x + move[0]) % max_x
-            new_y = (old_y + move[1]) % max_y
-
-            # check if the new prey location coincides with a predator
-            if (new_x,new_y) == (state[0], state[1]):
-                continue
-            else:
-                # this beautiful pythonian for-else construction triggers the
-                # else if the for loop is ended normally (not by break). 
-                possible_moves[move] = 1
+    def getPossibleActions( self, s ):
+        '''
+        Get the possible moves for a prey given the current state        
+        '''
+        possible_actions = dict()
+        
+        for a in self.actions:
+            s_prime = self.performAction( s, a )
+            if s_prime not in self.environment.terminal_states:
+                possible_actions[s_prime] = 1
 
         # find the probability of each move based on the possible moves 
-        if len(possible_moves) > 0:
-            for move in possible_moves:
-                possible_moves[move] = 0.2 / len(possible_moves)        
-        possible_moves[self.MOVE_STAY] = 0.8
-        return possible_moves
+        if len(possible_actions) > 0:
+            for a in possible_actions:
+                possible_actions[a] = 0.2 / len(possible_actions)        
+        possible_actions[self.ACTION_STAY] = 0.8
+        return possible_actions
 
-    def getPossibleMovesReduced(self, max_x, max_y, state):
-        possible_moves = dict()
-        for move in [self.MOVE_UP, self.MOVE_DOWN, self.MOVE_RIGHT, self.MOVE_LEFT]:
-            
+    def getPossibleActionsReduced(self, s, terminal_states ):
+        '''
+        Get the possible moves for a prey given the current reduced state     
+        '''
+        possible_actions = dict()
+        for a in self.actions:            
             # determine the new location based on environment borders
-            new_state = self.hypoMoveReduced(max_x, max_y, move, state)
-
-            new_x, new_y = new_state
+            s_prime = self.performActionReduced( a, s )
 
             # check if the new prey location coincides with a predator
-            if new_state == (0,0):
-                continue
-            else:
-                possible_moves[move] = 1
-
+            if s_prime not in self.environment.terminal_states:
+                possible_actions[a] = 1
         
         # find the probability of each move based on the possible moves 
-        for move in possible_moves:
-            possible_moves[move] = 0.2 / len(possible_moves)
-        possible_moves[self.MOVE_STAY] = 0.8
-        return possible_moves
-
+        for a in possible_actions:
+            possible_actions[a] = 0.2 / len(possible_actions)
+        possible_actions[self.MOVE_STAY] = 0.8
+        
+        return possible_actions
