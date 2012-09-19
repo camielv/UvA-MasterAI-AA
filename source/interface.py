@@ -9,22 +9,22 @@
 # Description:  This class is a Graphical Interface for visualizing the grid.
 
 import pygame, sys, time
-from EnvironmentNormal import EnvironmentNormal
 from threading import Thread
 from pygame.locals import * 
 
 class Interface( Thread ):
-    """ Graphical Interface for displaying the environment """
+    ''' Graphical Interface for displaying the environment '''
 
     # Constructor
     def __init__( self, size = (11, 11), s = (0, 0, 5, 5) ):
+        ''' Constructor for setting up the GUI '''
         Thread.__init__(self)
         pygame.init()
 
         # Setup the main screen
         self.size = size
         self.offset = 100
-        self.refresh = 0.4
+        self.refresh = 0.2
         self.resolution = ( self.offset + size[0] * 50, self.offset + size[1] * 50 )
         self.screen = pygame.display.set_mode( self.resolution )
         pygame.display.set_caption( 'Autonomous Agents: Predator vs. Prey' )
@@ -35,27 +35,27 @@ class Interface( Thread ):
         self.background.fill( (255, 255, 255) )
         self.__drawBoard()
 
-        # Predator
+        # Predator sprite
         self.predator = pygame.image.load( "images/predator.png" ).convert()
         self.predator_rect = self.predator.get_rect()
         self.predator_rect.left = (self.offset / 2) + (s[0] * 51) + 1
         self.predator_rect.top  = (self.offset / 2) + (s[1] * 51) + 1
 
-        # Prey
+        # Prey sprite
         self.prey = pygame.image.load( "images/prey.png" ).convert()
         self.prey_rect = self.prey.get_rect()
         self.prey_rect.left = (self.offset / 2) + (s[2] * 51) + 1
         self.prey_rect.top  = (self.offset / 2) + (s[3] * 51) + 1
 
-    # Draws the board on the background
     def __drawBoard( self ):
+        ''' Draws the board '''
         for i in range( self.size[0] + 1 ):
             pygame.draw.line( self.background, (0, 0, 0), ( self.offset / 2, self.offset / 2 + i * 51), ( self.offset / 2 + self.size[1] * 51, self.offset / 2 + i * 51) )
         for i in range( self.size[1] + 1 ):
             pygame.draw.line( self.background, (0, 0, 0), ( self.offset / 2 + i * 51, self.offset / 2), ( self.offset /2 + i * 51, self.offset / 2 + self.size[0] * 51) )
 
-    # Updates the screen
     def __update( self ):
+        ''' Updates the location of the predator and the prey on the screen '''
         # Create new frame
         frame = self.background.copy()
         frame.blit( self.predator, self.predator_rect )
@@ -65,29 +65,32 @@ class Interface( Thread ):
         self.screen.blit( frame, (0, 0) )
         pygame.display.flip()
 
-    # Sets the location of the predator
     def setPredator( self, location ):
+        ''' Sets the predator location on the screen '''
         self.predator_rect.left = (self.offset / 2) + ( (location[0] % self.size[1] ) * 51) + 1
         self.predator_rect.top  = (self.offset / 2) + ( (location[1] % self.size[1] ) * 51) + 1
         time.sleep( self.refresh )
 
-    # Sets the location of the prey
     def setPrey( self, location ):
+        ''' Sets the prey location on the screen '''
         self.prey_rect.left = (self.offset / 2) + ( (location[0] % self.size[0]) * 51) + 1
         self.prey_rect.top  = (self.offset / 2) + ( (location[1] % self.size[1]) * 51) + 1
-        time.sleep( self.refresh)
+        time.sleep( self.refresh )
 
-    # Thread function checks if screen is quitted and updates screen.
     def run( self ):
+        ''' Updates the screen and checks for quit events '''
         while( 1 ):
             for e in pygame.event.get():
                 if ( ( e.type == QUIT ) ):
                     sys.exit()
+
             self.__update()
             time.sleep( self.refresh / 2 )
 
+
 # DEMONSTRATION
 if( __name__ == '__main__' ):
+    from EnvironmentNormal import EnvironmentNormal
     E = EnvironmentNormal()
     s = E.getState()
 
