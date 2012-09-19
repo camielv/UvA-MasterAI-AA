@@ -14,7 +14,7 @@ class Prey():
     ACTION_LEFT = (0,-1)
     ACTION_STAY = (0,0)
     
-    location = (0,0)  
+    location = None
     actions = set([ACTION_UP, ACTION_DOWN, ACTION_RIGHT, ACTION_LEFT, ACTION_STAY])
     
     def __init__(self, environment, location):
@@ -53,7 +53,8 @@ class Prey():
         for a in possible_actions:
             cumulative_prob +=  possible_actions[a]
             if random_number <= cumulative_prob:
-                return performAction( s, a )
+                self.location = performAction( s, a )
+                return self.location
                 
     def performAction(self, s, a):
         '''
