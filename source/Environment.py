@@ -146,9 +146,11 @@ class Environment:
         stable = False
         gamma = 0.7
         
+        
         while not stable:
             # Policy evaluation
             V = self.policyEvaluation()
+            updated = 0
             
             # Policy improvement
             stable = True
@@ -162,28 +164,33 @@ class Environment:
                 # Check all possible actions
                 for a in self.predator.actions:
                     P = self.nextStates( s, a )
-                    value = 0
+                    value = 0.0
                     
                     for s_prime in P:
                         value += P[s_prime] * ( self.reward( s, a, s_prime ) + gamma * V[s_prime] )
-                        
+                    #print 'value of action',a,'in state',s,'is',value
                     if value > best_value:
                         best_action = a
+                        best_value = value
                 
                 # Check policy stability
                 if best_action != policy_action:
                     self.predator.updatePolicy( s, best_action )
+                    print 'updated: in', s, 'do', best_action, 'was', policy_action
+                    #raw_input()
+                    updated += 1
                     stable = False
+            print 'Updated', updated, 'actions'
+            if int(raw_input()): return V
+        return V
 
     def run( self ):
         '''Performs one step of the simulation.'''
         # Retrieve the state
         s = self.getState()
-        print s
         
         # Update predator positions given a state s
-        new_state = self.predator.simulateAction( s, False )
-
+        s_prime = self.predator.simulateAction( s, False )
             
         # Update prey position given the new state
-        s_prime = self.prey.simulateAction( s, False )
+        self.prey.simulateAction( s_prime, False )

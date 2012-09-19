@@ -98,10 +98,11 @@ class Predator():
 
         return (new_x, new_y)
 
-    def updatePolicy(self, s, best_a):
+    def updatePolicy(self, s, new_a):
+        # Set probabilities of all actions to 0
         for a in self.actions:
-            self.policy[(s,a)] = 0
+            self.policy[(s,a)] = 0.0
                                  
-        # Give the best action for a state a probability of 1
-        self.policy[(s,best_a)] = 1.0
+        # Give the new action for this state a probability of 1
+        self.policy[(s,new_a)] = 1.0
         
