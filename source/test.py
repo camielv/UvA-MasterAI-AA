@@ -122,6 +122,7 @@ while delta > theta:
     # Store the new values
     for s in S:
         V[s] = new_V[s]
-       
-    print 'Iteration', i
+    
     i += 1
+
+print 'Iteration', i

@@ -16,8 +16,8 @@ class Environment:
     def __init__( self, width=11, height=11 ):
         self.width  = width
         self.height = height
-        self.S,self.terminal_states = self.getStates()        
-                
+        self.S, self.terminal_states = self.getStates()        
+
     def getState( self ):
         '''Returns the current environment state.'''
         
@@ -165,7 +165,7 @@ class Environment:
                     value = 0
                     
                     for s_prime in P:
-                        value += P[s_prime] * ( self.reward( s_prime ) + gamma * V[s_prime] )
+                        value += P[s_prime] * ( self.reward( s, a, s_prime ) + gamma * V[s_prime] )
                         
                     if value > best_value:
                         best_action = a
