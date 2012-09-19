@@ -179,7 +179,6 @@ class Environment:
         '''Performs one step of the simulation.'''
         # Retrieve the state
         s = self.getState()
-        print s
         
         # Update predator positions given a state s
         new_state = self.predator.simulateAction( s, False )
