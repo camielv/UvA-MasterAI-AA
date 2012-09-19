@@ -11,8 +11,9 @@
 
 from predator import Predator
 from prey import Prey
+from Environment import Environment
 
-class Environment:
+class EnvironmentReduced( Environment ):
     '''
     Creates an instance of the environment. Default an eleven by eleven grid
     is used. The default position for the prey is (5,5).

@@ -6,7 +6,7 @@
 #               Camiel Verschoor
 #
 # File:         environment.py
-# Description:  Base class of the environment.
+# Description:  Subclass of the environment.
 
 from predator import Predator
 from prey import Prey
@@ -19,16 +19,18 @@ class EnvironmentNormal( Environment ):
     '''
     def __init__( self, width=11, height=11, preyLocation=(5,5), 
                   predatorLocation=(0,0) ):
+        # Set the borders of the environment
         self.width  = width
         self.height = height
+
+        # Get the current statespace including terminal states
         S,terminal_states = self.getStates()        
         self.S = S
         self.terminal_states = terminal_states
-                
         
         self.predator = Predator( self, predatorLocation )
         self.prey = Prey( self, preyLocation )
-        
+    
     def getState( self ):
         '''Returns the current environment state.'''
         # Create state
