@@ -42,8 +42,11 @@ class Predator():
         
         a = self.getAction( s ) 
         
-        self.location = performAction( s, a )
-        return self.location
+        s_prime = performAction( s, a )
+        predator_x, predator_y, _, _ = s_prime
+        self.location = (predator_x, predator_y)
+
+        return s_prime
 
     def getAction( self, s ):
         '''
@@ -53,8 +56,8 @@ class Predator():
 
         cumulative_prob = 0 
         
-        for a in self.policy:
-            cumulative_prob += self.policy[a]
+        for (possible_s,a) in self.policy:
+            cumulative_prob += self.policy[(possible_s,a)]
             if cumulative_prob > random_number:                
                 return a
 

@@ -25,8 +25,8 @@ class EnvironmentNormal( Environment ):
     def getState( self ):
         '''Returns the current environment state.'''
         # Create state
-        predator_x, predator_y = self.predator.getLocation()
-        prey_x, prey_y = self.prey.getLocation()
+        predator_x, predator_y = self.predator.location
+        prey_x, prey_y = self.prey.location
         
         # Retrieve predator positions
         s = (predator_x, predator_y, prey_x, prey_y)

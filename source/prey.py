@@ -24,9 +24,6 @@ class Prey():
         self.environment = environment
         self.location = location
     
-    def getLocation(self):
-        return self.location    
-    
     def simulateAction(self, s, reduced):
         """
         Function move(location, max_x, max_y) -> new_location
@@ -53,8 +50,10 @@ class Prey():
         for a in possible_states:
             cumulative_prob +=  possible_states[a]
             if random_number <= cumulative_prob:
-                self.location = performAction( s, a )
-                return self.location
+                s_prime = performAction( s, a )
+                _, _, prey_x, prey_y = s_prime
+                self.location = (prey_x, prey_y)
+                return s_prime
                 
     def performAction(self, s, a):
         '''

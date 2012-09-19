@@ -9,6 +9,7 @@
 # Description:  This class is a Graphical Interface for visualizing the grid.
 
 import pygame, sys, time
+from EnvironmentNormal import EnvironmentNormal
 from threading import Thread
 from pygame.locals import * 
 
@@ -16,7 +17,7 @@ class Interface( Thread ):
     """ Graphical Interface for displaying the environment """
 
     # Constructor
-    def __init__( self, size = (11, 11), prey = (0, 0), predator = (5, 5) ):
+    def __init__( self, size = (11, 11), s = (0, 0, 5, 5) ):
         Thread.__init__(self)
         pygame.init()
 
@@ -37,14 +38,14 @@ class Interface( Thread ):
         # Predator
         self.predator = pygame.image.load( "images/predator.png" ).convert()
         self.predator_rect = self.predator.get_rect()
-        self.predator_rect.left = (self.offset / 2) + (predator[0] * 51) + 1
-        self.predator_rect.top  = (self.offset / 2) + (predator[1] * 51) + 1
+        self.predator_rect.left = (self.offset / 2) + (s[0] * 51) + 1
+        self.predator_rect.top  = (self.offset / 2) + (s[1] * 51) + 1
 
         # Prey
         self.prey = pygame.image.load( "images/prey.png" ).convert()
         self.prey_rect = self.prey.get_rect()
-        self.prey_rect.left = (self.offset / 2) + (prey[0] * 51) + 1
-        self.prey_rect.top  = (self.offset / 2) + (prey[1] * 51) + 1
+        self.prey_rect.left = (self.offset / 2) + (s[2] * 51) + 1
+        self.prey_rect.top  = (self.offset / 2) + (s[3] * 51) + 1
 
     # Draws the board on the background
     def __drawBoard( self ):
@@ -87,13 +88,22 @@ class Interface( Thread ):
 
 # DEMONSTRATION
 if( __name__ == '__main__' ):
-    GUI = Interface( (11, 11), (0, 0), (5, 5) )
+    E = EnvironmentNormal()
+    s = E.getState()
+
+    GUI = Interface( (11, 11), s )
     GUI.start()
 
-    # PATH
-    for i in range( 22 ):
-        GUI.setPrey( ( (0+i), 0) )
-        GUI.setPredator( ( 5, (5+i) ) )
+    pred_x, pred_y, prey_x, prey_y = s
 
+    while( not( (pred_x, pred_y) == (prey_x, prey_y) ) ):
+        E.run()
+        s = E.getState()
+
+        pred_x, pred_y, prey_x, prey_y = s
+
+        GUI.setPredator( (pred_x, pred_y) )
+        GUI.setPrey( (prey_x, prey_y) )
+        time.sleep( 1 )
     # Wait for GUI to end
     GUI.join()
