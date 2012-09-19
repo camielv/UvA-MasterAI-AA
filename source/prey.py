@@ -38,20 +38,20 @@ class Prey():
         # Determine which function should be used based on a boolean 'reduced'.
         # If the boolean is true, the reduced statespace will be used. 
         if not reduced:
-            getPossibleActions = self.getPossibleActions
+            getPossibleStates = self.getPossibleStates
             performAction = self.performAction
         else:
-            getPossibleActions = self.getPossibleActionsReduced
+            getPossibleStates = self.getPossibleStatesReduced
             performAction = self.performActionReduced
         
-        possible_actions = getPossibleActions( s ) 
+        possible_states = getPossibleStates( s ) 
  
         # Between 0 and 1, used to determine the current action
         random_number = random.random()
         
         cumulative_prob = 0
-        for a in possible_actions:
-            cumulative_prob +=  possible_actions[a]
+        for a in possible_states:
+            cumulative_prob +=  possible_states[a]
             if random_number <= cumulative_prob:
                 self.location = performAction( s, a )
                 return self.location
@@ -99,36 +99,43 @@ class Prey():
         '''
         Get the possible moves for a prey given the current state        
         '''
-        possible_actions = dict()
-        
+        possible_states = dict()
+        if s in self.environment.terminal_states:
+            possible_states[s] = 1
+            return possible_states
+            
         for a in self.actions:
             s_prime = self.performAction( s, a )
-            if s_prime not in self.environment.terminal_states:
-                possible_actions[s_prime] = 1
+            if not s_prime in self.environment.terminal_states:
+                possible_states[s_prime] = 1
 
         # find the probability of each move based on the possible moves 
-        if len(possible_actions) > 0:
-            for a in possible_actions:
-                possible_actions[a] = 0.2 / len(possible_actions)        
-        possible_actions[s] = 0.8
-        return possible_actions
+        p_action = 0.2 / (len(possible_states)-1)
+        for possible_s in possible_states:
+            possible_states[possible_s] = p_action
+        possible_states[s] = 0.8
+        return possible_states
 
     def getPossibleStatesReduced(self, s ):
         '''
         Get the possible moves for a prey given the current reduced state     
         '''
-        possible_actions = dict()
+        possible_states = dict()
+        if s in self.environment.terminal_states:
+            possible_states[s] = 1
+            return possible_states
+
         for a in self.actions:            
             # determine the new location based on environment borders
             s_prime = self.performActionReduced( a, s )
 
             # check if the new prey location coincides with a predator
             if s_prime not in self.environment.terminal_states:
-                possible_actions[a] = 1
+                possible_states[a] = 1
         
         # find the probability of each move based on the possible moves 
-        for a in possible_actions:
-            possible_actions[a] = 0.2 / len(possible_actions)
-        possible_actions[s] = 0.8
+        for a in possible_states:
+            possible_states[a] = 0.2 / len(possible_states)
+        possible_states[s] = 0.8
         
-        return possible_actions
+        return possible_states
