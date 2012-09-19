@@ -15,34 +15,29 @@ from interface import Interface
 def main():
     ''' Main function running single agent planning and the GUI '''
     # Initialize environment and get the begin state
-    E = EnvironmentNormal()
-    s = E.getState()
+    E = EnvironmentReduced()
 
+    # Perform policy iteration
+    E.policyIteration()
+    
     # Initialize Graphical User Interface with current state
-    GUI = Interface( (11, 11), s )
+    GUI = Interface( (11, 11) )
     GUI.start()
-
-    # Decode the state
-    pred_x, pred_y, prey_x, prey_y = s
 
     print "Start simulation"
     # If the prey is not caught then run.
-    while( not( (pred_x, pred_y) == (prey_x, prey_y) ) ):
+    while not E.predator.location == E.prey.location:
         # Run a step
         E.run()
 
         # If reload key 'r' is pressed restart
         if GUI.getReload():
             print "Reload simulation"
-            E = EnvironmentNormal()
-
-        s = E.getState()
-
-        pred_x, pred_y, prey_x, prey_y = s
-
+            E.reset()
+       
         # Set new locations in GUI
-        GUI.setPredator( (pred_x, pred_y) )
-        GUI.setPrey( (prey_x, prey_y) )
+        GUI.setPredator( E.predator.location )
+        GUI.setPrey( E.prey.location )
 
         if GUI.getStatus():
             break
@@ -51,5 +46,5 @@ def main():
     GUI.join()
 
 # If this is the main script run main function
-if( __name__ == '__main__' ):
+if __name__ == '__main__':
     main()

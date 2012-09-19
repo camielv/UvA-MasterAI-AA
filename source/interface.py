@@ -69,7 +69,7 @@ class Interface( Thread ):
 
     def setPredator( self, location ):
         ''' Sets the predator location on the screen '''
-        self.predator_rect.left = (self.offset / 2) + ( (location[0] % self.size[1] ) * 51) + 1
+        self.predator_rect.left = (self.offset / 2) + ( (location[0] % self.size[0] ) * 51) + 1
         self.predator_rect.top  = (self.offset / 2) + ( (location[1] % self.size[1] ) * 51) + 1
         time.sleep( self.refresh )
 

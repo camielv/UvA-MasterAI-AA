@@ -41,11 +41,19 @@ class Predator():
             performAction = self.performActionReduced
         
         a = self.getAction( s ) 
+        print 'predator move:', a
         
         s_prime = performAction( s, a )
-        predator_x, predator_y, _, _ = s_prime
-        self.location = (predator_x, predator_y)
 
+        if reduced:          
+            new_x = self.location[0] - (s[0] - s_prime[0])
+            new_y = self.location[1] - (s[1] - s_prime[1])
+            
+            new_x = new_x % self.environment.width
+            new_y = new_y % self.environment.height
+            self.location = (new_x, new_y)
+        else:
+            self.location = (s_prime[0], s_prime[1])
         return s_prime
 
     def getAction( self, s ):
@@ -56,8 +64,8 @@ class Predator():
 
         cumulative_prob = 0.0
         
-        for (possible_s,a) in self.policy:
-            cumulative_prob += self.policy[(possible_s,a)]
+        for a in self.actions:
+            cumulative_prob += self.policy[(s,a)]
             if cumulative_prob >= random_number:                
                 return a
 

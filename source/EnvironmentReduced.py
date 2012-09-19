@@ -9,8 +9,6 @@
 # Description:  Subclass of the environment, where a 2d state representation is
 #               used.
 
-from predator import Predator
-from prey import Prey
 from Environment import Environment
 
 class EnvironmentReduced( Environment ):
@@ -18,10 +16,15 @@ class EnvironmentReduced( Environment ):
     Creates an instance of the environment. Default an eleven by eleven grid
     is used. The default position for the prey is (5,5).
     '''
-    def __init__(self, preyLocation=(5,5), predatorLocation=(0,0) ):
-        Environment.__init__(self)
-        self.predator = Predator( self, predatorLocation )
-        self.prey = Prey( self, preyLocation )
+    #def __init__(self, preyLocation=(5,5), predatorLocation=(0,0) ):
+    #    Environment.__init__(self)
+
+    def getState(self):
+        predator = self.predator.location
+        prey = self.prey.location
+        state_x = ( ( 5 + predator[0] - prey[0] ) % (self.width ) ) - 5
+        state_y = ( ( 5 + predator[1] - prey[1] ) % (self.height ) ) - 5
+        return state_x,state_y
     
     def getStates(self):
        '''
@@ -60,3 +63,15 @@ class EnvironmentReduced( Environment ):
         '''
         new_state = self.predator.performActionReduced( s, a )
         return self.prey.getPossibleStatesReduced( new_state )
+        
+        
+    def run( self ):
+        '''Performs one step of the simulation.'''
+        # Retrieve the state
+        s = self.getState()
+        
+        # Update predator positions given a state s
+        s_prime = self.predator.simulateAction( s, True )
+            
+        # Update prey position given the new state
+        self.prey.simulateAction( s_prime, True )

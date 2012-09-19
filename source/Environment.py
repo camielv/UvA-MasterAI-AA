@@ -7,20 +7,23 @@
 #
 # File:         environment.py
 # Description:  Base class of the environment.
+from predator import Predator
+from prey import Prey
 
 class Environment:
     '''
     Creates an instance of the environment. Default an eleven by eleven grid
     is used. The default position for the prey is (5,5).
     '''
-    def __init__( self, width=11, height=11 ):
+    def __init__( self, width=11, height=11, preyLocation=(5,5), predatorLocation=(0,0) ):
         self.width  = width
         self.height = height
-        self.S,self.terminal_states = self.getStates()        
+        self.S,self.terminal_states = self.getStates()
+        self.predator = Predator( self, predatorLocation )
+        self.prey = Prey( self, preyLocation )
                 
     def getState( self ):
-        '''Returns the current environment state.'''
-        
+        '''Returns the current environment state.'''        
         raise NotImplementedError
         
     def getStates(self):
@@ -72,7 +75,7 @@ class Environment:
             
             i += 1
 
-        print 'Iteration', i
+        print 'Policy Evaluation took', i, 'iterations'
         return V
 
     def reward( self, s, a, s_prime ):
@@ -176,21 +179,13 @@ class Environment:
                 # Check policy stability
                 if best_action != policy_action:
                     self.predator.updatePolicy( s, best_action )
-                    print 'updated: in', s, 'do', best_action, 'was', policy_action
-                    #raw_input()
+                    
                     updated += 1
                     stable = False
             print 'Updated', updated, 'actions'
-            if int(raw_input()): return V
-        return V
 
-    def run( self ):
-        '''Performs one step of the simulation.'''
-        # Retrieve the state
-        s = self.getState()
+        return V
         
-        # Update predator positions given a state s
-        s_prime = self.predator.simulateAction( s, False )
-            
-        # Update prey position given the new state
-        self.prey.simulateAction( s_prime, False )
+    def reset(self):
+        self.prey.location = (5,5)
+        self.predator.location = (0,0)

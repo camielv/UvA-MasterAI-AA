@@ -34,12 +34,10 @@ class Prey():
  
         # Determine which function should be used based on a boolean 'reduced'.
         # If the boolean is true, the reduced statespace will be used. 
-        if not reduced:
-            getPossibleStates = self.getPossibleStates
-            performAction = self.performAction
-        else:
+        if reduced:
             getPossibleStates = self.getPossibleStatesReduced
-            performAction = self.performActionReduced
+        else:
+            getPossibleStates = self.getPossibleStates
         
         possible_states = getPossibleStates( s ) 
  
@@ -47,12 +45,19 @@ class Prey():
         random_number = random.random()
         
         cumulative_prob = 0
-        for a in possible_states:
-            cumulative_prob +=  possible_states[a]
+        for s_prime in possible_states:
+            cumulative_prob +=  possible_states[s_prime]
             if random_number <= cumulative_prob:
-                s_prime = performAction( s, a )
-                _, _, prey_x, prey_y = s_prime
-                self.location = (prey_x, prey_y)
+                if reduced:
+                    new_x = self.location[0] + s[0] - s_prime[0]
+                    new_y = self.location[1] + s[1] - s_prime[1]
+                    
+                    new_x = new_x % self.environment.width
+                    new_y = new_y % self.environment.height
+                    
+                    self.location = (new_x, new_y)
+                else:
+                    self.location = (s_prime[2], s_prime[3])
                 return s_prime
                 
     def performAction(self, s, a):

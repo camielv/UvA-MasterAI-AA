@@ -8,8 +8,6 @@
 # File:         environment.py
 # Description:  Subclass of the environment.
 
-from predator import Predator
-from prey import Prey
 from Environment import Environment
 
 class EnvironmentNormal( Environment ):
@@ -17,10 +15,9 @@ class EnvironmentNormal( Environment ):
     Creates an instance of the environment. Default an eleven by eleven grid
     is used. The default position for the prey is (5,5).
     '''
-    def __init__( self, preyLocation=(5,5), predatorLocation=(0,0) ):
-        Environment.__init__(self)
-        self.predator = Predator( self, predatorLocation )
-        self.prey = Prey( self, preyLocation )
+    #def __init__( self, preyLocation=(5,5), predatorLocation=(0,0) ):
+    #    Environment.__init__(self)
+        
     
     def getState( self ):
         '''Returns the current environment state.'''
@@ -63,4 +60,14 @@ class EnvironmentNormal( Environment ):
     def nextStates( self, s, a ):
         new_state = self.predator.performAction( s, a )
         return self.prey.getPossibleStates( new_state )
-          
+        
+    def run( self ):
+        '''Performs one step of the simulation.'''
+        # Retrieve the state
+        s = self.getState()
+        
+        # Update predator positions given a state s
+        s_prime = self.predator.simulateAction( s, False )
+            
+        # Update prey position given the new state
+        self.prey.simulateAction( s_prime, False )
