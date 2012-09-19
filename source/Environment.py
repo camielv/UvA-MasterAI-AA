@@ -137,6 +137,43 @@ class Environment:
             # Store the new values
             V.update( new_V )
         return V
+        
+    def policyIteration( self ):
+        '''
+        Performs policy iteration starting from the policy of the predator.
+        '''
+        # Initialization
+        stable = False
+        gamma = 0.7
+        
+        while not stable:
+            # Policy evaluation
+            V = self.policyEvaluation()
+            
+            # Policy improvement
+            stable = True
+            for s in self.S:
+                # Retrieve action according to policy
+                policy_action = self.predator.getAction( s )
+                
+                best_action = None
+                best_value = None
+                
+                # Check all possible actions
+                for a in self.predator.actions:
+                    P = self.nextStates( s, a )
+                    value = 0
+                    
+                    for s_prime in P:
+                        value += P[s_prime] * ( self.reward( s_prime ) + gamma * V[s_prime] )
+                        
+                    if value > best_value:
+                        best_action = a
+                
+                # Check policy stability
+                if best_action != policy_action:
+                    self.predator.updatePolicy( s, best_action )
+                    stable = False
 
     def run( self ):
         '''Performs one step of the simulation.'''
