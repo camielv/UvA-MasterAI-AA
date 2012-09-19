@@ -64,7 +64,7 @@ class Predator():
         new_x = (x + a[0]) % self.environment.width
         new_y = (y + a[1]) % self.environment.height
        
-        return ( s[0], s[1], new_x, new_y )
+        return ( new_x, new_y, s[2], s[3] )
 
     def performActionReduced( self, s, a ):
         ''' 
