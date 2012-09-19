@@ -17,10 +17,9 @@ class Environment:
                  predatorLocation = ( 0, 0 ) ):
         self.width  = width
         self.height = height
-        S,terminal_states = self.getStates()        
-        self.S = S
-        self.terminal_states = terminal_states
-                
+
+        self.S, self.terminal_states = self.getStates()        
+        
     def getState( self ):
         '''Returns the current environment state.'''
         
