@@ -54,11 +54,11 @@ class Predator():
         '''
         random_number = random.random()
 
-        cumulative_prob = 0 
+        cumulative_prob = 0.0
         
         for (possible_s,a) in self.policy:
             cumulative_prob += self.policy[(possible_s,a)]
-            if cumulative_prob > random_number:                
+            if cumulative_prob >= random_number:                
                 return a
 
     def performAction( self, s, a ):
@@ -102,7 +102,7 @@ class Predator():
         # Set probabilities of all actions to 0
         for a in self.actions:
             self.policy[(s,a)] = 0.0
-                                 
+            
         # Give the new action for this state a probability of 1
         self.policy[(s,new_a)] = 1.0
         
