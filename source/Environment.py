@@ -13,13 +13,11 @@ class Environment:
     Creates an instance of the environment. Default an eleven by eleven grid
     is used. The default position for the prey is (5,5).
     '''
-    def __init__( self, width = 11, height = 11, preyLocation = ( 5, 5), 
-                 predatorLocation = ( 0, 0 ) ):
+    def __init__( self, width=11, height=11 ):
         self.width  = width
         self.height = height
-
         self.S, self.terminal_states = self.getStates()        
-        
+
     def getState( self ):
         '''Returns the current environment state.'''
         
@@ -27,7 +25,8 @@ class Environment:
         
     def getStates(self):
         '''
-        Gets the entire statespace in two sets, the first containing the non-terminal states and the second containing terminal states.
+        Gets the entire statespace in two sets, the first containing the non-
+        terminal states and the second containing terminal states.
         '''
         raise NotImplementedError
 
@@ -97,15 +96,16 @@ class Environment:
             V[s] = 0
           
         policy = self.predator.policy # Returns a dict
+
         # Define delta and theta
         delta = 0.2  
         theta = 0.00 
-        
+        discount = 0.7
+        new_V = dict()
+            
         # Policy evaluation
         while delta > theta:
             delta = 0
-            new_V = dict()
-            discount = 0.8
             for s in self.S:
                 new_V[s] = 0                     
                 
@@ -137,6 +137,43 @@ class Environment:
             # Store the new values
             V.update( new_V )
         return V
+        
+    def policyIteration( self ):
+        '''
+        Performs policy iteration starting from the policy of the predator.
+        '''
+        # Initialization
+        stable = False
+        gamma = 0.7
+        
+        while not stable:
+            # Policy evaluation
+            V = self.policyEvaluation()
+            
+            # Policy improvement
+            stable = True
+            for s in self.S:
+                # Retrieve action according to policy
+                policy_action = self.predator.getAction( s )
+                
+                best_action = None
+                best_value = None
+                
+                # Check all possible actions
+                for a in self.predator.actions:
+                    P = self.nextStates( s, a )
+                    value = 0
+                    
+                    for s_prime in P:
+                        value += P[s_prime] * ( self.reward( s, a, s_prime ) + gamma * V[s_prime] )
+                        
+                    if value > best_value:
+                        best_action = a
+                
+                # Check policy stability
+                if best_action != policy_action:
+                    self.predator.updatePolicy( s, best_action )
+                    stable = False
 
     def run( self ):
         '''Performs one step of the simulation.'''

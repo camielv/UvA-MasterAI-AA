@@ -17,6 +17,8 @@ class Predator():
     actions = set([ACTION_UP, ACTION_DOWN, ACTION_RIGHT, ACTION_LEFT, ACTION_STAY])
     policy = dict()
     
+    location = None
+    
     def __init__( self, environment, location=(0,0) ):
         self.location = location
         self.environment = environment
@@ -40,7 +42,8 @@ class Predator():
         
         a = self.getAction( s ) 
         
-        return performAction( s, a )
+        self.location = performAction( s, a )
+        return self.location
 
     def getAction( self, s ):
         '''
@@ -64,7 +67,7 @@ class Predator():
         new_x = (x + a[0]) % self.environment.width
         new_y = (y + a[1]) % self.environment.height
        
-        return ( s[0], s[1], new_x, new_y )
+        return ( new_x, new_y, s[2], s[3] )
 
     def performActionReduced( self, s, a ):
         ''' 
@@ -91,3 +94,11 @@ class Predator():
             new_y = -a[1]
 
         return (new_x, new_y)
+
+    def updatePolicy(self, s, best_a):
+        for a in self.actions:
+            self.policy[(s,a)] = 0
+                                 
+        # Give the best action for a state a probability of 1
+        self.policy[(s,best_a)] = 1.0
+        

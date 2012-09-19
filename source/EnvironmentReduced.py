@@ -18,17 +18,8 @@ class EnvironmentReduced( Environment ):
     Creates an instance of the environment. Default an eleven by eleven grid
     is used. The default position for the prey is (5,5).
     '''
-    def __init__(self, width=11, height=11, preyLocation=(5,5), 
-                 predatorLocation=(0,0) ):
-        # Set the borders of the environment
-        self.width  = width
-        self.height = height
-
-        # Get the current statespace including terminal states
-        S,terminal_states = self.getStates()        
-        self.S = S
-        self.terminal_states = terminal_states
-        
+    def __init__(self, preyLocation=(5,5), predatorLocation=(0,0) ):
+        Environment.__init__(self)
         self.predator = Predator( self, predatorLocation )
         self.prey = Prey( self, preyLocation )
     
