@@ -14,7 +14,7 @@ class Prey():
     ACTION_LEFT = (0,-1)
     ACTION_STAY = (0,0)
     
-    location = (0,0)  
+    location = None
     actions = set([ACTION_UP, ACTION_DOWN, ACTION_RIGHT, ACTION_LEFT, ACTION_STAY])
     
     def __init__(self, environment, location):
@@ -113,6 +113,7 @@ class Prey():
         for possible_s in possible_states:
             possible_states[possible_s] = p_action
         possible_states[s] = 0.8
+        
         return possible_states
 
     def getPossibleStatesReduced(self, s ):
@@ -130,11 +131,11 @@ class Prey():
 
             # check if the new prey location coincides with a predator
             if s_prime not in self.environment.terminal_states:
-                possible_states[a] = 1
+                possible_states[s_prime] = 1
         
         # find the probability of each move based on the possible moves 
-        for a in possible_states:
-            possible_states[a] = 0.2 / len(possible_states)
+        for possible_s in possible_states:
+            possible_states[possible_s] = 0.2 / len(possible_states)
         possible_states[s] = 0.8
         
         return possible_states

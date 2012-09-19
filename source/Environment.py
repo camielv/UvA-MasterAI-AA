@@ -165,7 +165,7 @@ class Environment:
                     value = 0
                     
                     for s_prime in P:
-                        value += P[s_prime] * ( self.reward( s_prime ) + gamma * V[s_prime] )
+                        value += P[s_prime] * ( self.reward( s, a, s_prime ) + gamma * V[s_prime] )
                         
                     if value > best_value:
                         best_action = a
