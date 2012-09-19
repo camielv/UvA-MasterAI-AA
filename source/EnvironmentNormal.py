@@ -65,12 +65,11 @@ class EnvironmentNormal( Environment ):
         the predator and prey. In this case, state and action are actually 
         redundant but are added for the sake of completeness. 
         '''
-        print s_prime
         if (s_prime[0], s_prime[1]) == (s_prime[2], s_prime[3]):
             return 10
         return 0
 
     def nextStates( self, s, a ):
         new_state = self.predator.performAction( s, a )
-        return self.prey.getPossibleActions( new_state )
+        return self.prey.getPossibleStates( new_state )
           

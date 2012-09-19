@@ -94,7 +94,7 @@ class Prey():
 
         return s_prime
 
-    def getPossibleActions( self, s ):
+    def getPossibleStates( self, s ):
         '''
         Get the possible moves for a prey given the current state        
         '''
@@ -109,10 +109,10 @@ class Prey():
         if len(possible_actions) > 0:
             for a in possible_actions:
                 possible_actions[a] = 0.2 / len(possible_actions)        
-        possible_actions[self.ACTION_STAY] = 0.8
+        possible_actions[s] = 0.8
         return possible_actions
 
-    def getPossibleActionsReduced(self, s, terminal_states ):
+    def getPossibleStatesReduced(self, s ):
         '''
         Get the possible moves for a prey given the current reduced state     
         '''
@@ -128,6 +128,6 @@ class Prey():
         # find the probability of each move based on the possible moves 
         for a in possible_actions:
             possible_actions[a] = 0.2 / len(possible_actions)
-        possible_actions[self.MOVE_STAY] = 0.8
+        possible_actions[s] = 0.8
         
         return possible_actions
