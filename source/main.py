@@ -17,8 +17,8 @@ def main():
     # Initialize environment and get the begin state
     E = EnvironmentReduced()
 
-    # Perform policy iteration
-    E.policyIteration()
+    # Perform value iteration
+    E.valueIteration()
     
     # Initialize Graphical User Interface with current state
     GUI = Interface( (11, 11) )
