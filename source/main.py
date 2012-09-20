@@ -10,11 +10,5 @@
 
 from interface import Interface
 
-def main():
-    ''' Main function running single agent planning and the GUI '''
-    GUI = Interface( (11, 11) )
-    GUI.run()
-
-# If this is the main script run main function
-if __name__ == '__main__':
-    main()
+GUI = Interface( (11, 11) )
+GUI.run()

@@ -7,7 +7,7 @@
 #
 # File:         interface.py
 # Description:  This class is a Graphical Interface for visualizing the grid.
-import pygame, sys, time
+import pygame
 from pygame.locals import * 
 from EnvironmentReduced import EnvironmentReduced
 
@@ -68,9 +68,9 @@ class Interface():
         ''' Updates the location of the predator and the prey on the screen '''
         # Create new frame
         frame = self.background.copy()
-        frame.blit( self.predator, self.predator_rect )
         frame.blit( self.prey, self.prey_rect )
-
+        frame.blit( self.predator, self.predator_rect )
+        
         # Display frame
         self.screen.blit( frame, (0, 0) )
         pygame.display.flip()

@@ -50,7 +50,6 @@ class Predator():
             performAction = self.performActionReduced
         
         a = self.getAction( s ) 
-        print 'predator move:', a
         
         s_prime = performAction( s, a )
 
