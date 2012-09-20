@@ -33,7 +33,7 @@ class Environment:
         '''
         raise NotImplementedError
 
-    def policyEvaluation(self):
+    def policyEvaluation( self, gamma = 0.8 ):
         '''
         Performs policyEvaluation for the given predator in this environment. 
         '''
@@ -49,7 +49,7 @@ class Environment:
         # Define delta and theta
         delta = 0.2
         theta = 0   
-        discount = 0.8
+        
         # Keep track of the number of iterations
         i = 0
         
@@ -65,7 +65,7 @@ class Environment:
                     # Calculate all next states and their probabilities
                     P = self.nextStates( s, a )
                     for s_prime in P:
-                        new_V[s] += policy[(s,a)] * P[s_prime] * ( self.reward( s, a, s_prime ) + discount * V[s_prime] )
+                        new_V[s] += policy[(s,a)] * P[s_prime] * ( self.reward( s, a, s_prime ) + gamma * V[s_prime] )
                         
                 # Compute the error
                 delta = max( delta, abs( V[s] - new_V[s] ) )
@@ -89,7 +89,7 @@ class Environment:
     def nextStates( self, s, a ):
         raise NotImplementedError
           
-    def valueIteration( self ):    
+    def valueIteration( self, gamma = 0.7 ):    
         ''' 
         Perform value iteration for this environment. 
         '''        
@@ -97,13 +97,10 @@ class Environment:
         V = dict()
         for s in self.S | self.terminal_states:
             V[s] = 0
-          
-        policy = self.predator.policy # Returns a dict
-
+        
         # Define delta and theta
         delta = 0.2  
-        theta = 0.00 
-        discount = 0.7
+        theta = 0.0
         new_V = dict()
             
         # Policy evaluation
@@ -117,21 +114,20 @@ class Environment:
                 
                 for a in self.predator.actions:
                     current_value = 0
-                    policy[ (s, a) ] = 0
                     
                     # Calculate all next states and their probabilities
                     P = self.nextStates( s, a )
                     
                     # Find the action that maximizes the value
                     for s_prime in P:
-                        current_value +=  P[s_prime] * ( self.reward( s, a, s_prime ) + discount * V[s_prime] )
+                        current_value +=  P[s_prime] * ( self.reward( s, a, s_prime ) + gamma * V[s_prime] )
                 
                     if current_value > best_value:
                         best_value = current_value
                         best_action = a
                         
                 # In the new policy, that action is now the only one that is taken
-                policy[ ( s, best_action ) ] = 1.0           
+                self.predator.updatePolicy( s, best_action )
                 new_V[s] = best_value
                 
                 # Compute the error
@@ -141,47 +137,56 @@ class Environment:
             V.update( new_V )
         return V
         
-    def policyIteration( self ):
+    def policyImprovement( self, V, gamma = 0.7 ):
+        
+        updated = 0
+        stable = True
+        
+        for s in self.S:
+            # Retrieve action according to policy
+            policy_action = self.predator.getAction( s )
+            
+            best_action = None
+            best_value = None
+            
+            # Check all possible actions
+            for a in self.predator.actions:                
+                current_value = 0
+                
+                # Calculate next states and their probabilities
+                P = self.nextStates( s, a )
+                
+                for s_prime in P:
+                    current_value += P[s_prime] * ( self.reward( s, a, s_prime ) + gamma * V[s_prime] )
+                    
+                if current_value > best_value:
+                    best_value = current_value                    
+                    best_action = a                    
+
+            # Update the policy
+            self.predator.updatePolicy( s, best_action )
+            
+            # Check policy stability
+            if best_action != policy_action:
+                updated += 1
+                stable = False
+            
+        print 'Updated', updated, 'actions'
+        return stable
+        
+    def policyIteration( self, gamma = 0.7 ):
         '''
         Performs policy iteration starting from the policy of the predator.
         '''
         # Initialization
         stable = False
-        gamma = 0.7
-        
-        
+                
         while not stable:
-            # Policy evaluation
-            V = self.policyEvaluation()
-            updated = 0
+            # 1. Policy evaluation
+            V = self.policyEvaluation( gamma )
             
-            # Policy improvement
-            stable = True
-            for s in self.S:
-                # Retrieve action according to policy
-                policy_action = self.predator.getAction( s )
-                
-                best_action = None
-                best_value = None
-                
-                # Check all possible actions
-                for a in self.predator.actions:
-                    P = self.nextStates( s, a )
-                    value = 0.0
-                    
-                    for s_prime in P:
-                        value += P[s_prime] * ( self.reward( s, a, s_prime ) + gamma * V[s_prime] )
-                    #print 'value of action',a,'in state',s,'is',value
-                    if value > best_value:
-                        best_action = a
-                        best_value = value
-                
-                # Check policy stability
-                if best_action != policy_action:
-                    updated += 1
-                    stable = False
-                self.predator.updatePolicy( s, best_action )
-            print 'Updated', updated, 'actions'
+            # 2. Policy Improvement
+            stable = self.policyImprovement( V, gamma )
 
         return V
         

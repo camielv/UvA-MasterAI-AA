@@ -35,8 +35,8 @@ class EnvironmentReduced( Environment ):
        '''
        S = set()
        terminal_states = set()
-       for i in xrange( -self.width/2, self.width/2+1 ):
-           for j in xrange( -self.height/2, self.height/2+1 ):
+       for i in xrange( -(self.width/2), self.width/2+1 ):
+           for j in xrange( -(self.height/2), self.height/2+1 ):
                 s = (i,j)         
                 if i == 0 and j == 0:
                     terminal_states.add( s )
