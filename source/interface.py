@@ -7,25 +7,28 @@
 #
 # File:         interface.py
 # Description:  This class is a Graphical Interface for visualizing the grid.
-
 import pygame, sys, time
-from threading import Thread
 from pygame.locals import * 
+from EnvironmentReduced import EnvironmentReduced
 
-class Interface( Thread ):
+class Interface():
     ''' Graphical Interface for displaying the environment '''
 
     # Constructor
     def __init__( self, size = (11, 11), s = (0, 0, 5, 5) ):
         ''' Constructor for setting up the GUI '''
-        Thread.__init__(self)
         pygame.init()
+        
+        # Clock init
+        self.clock = pygame.time.Clock()
+
+        # Environment
+        self.E = EnvironmentReduced()
 
         # Setup the main screen
         self.size = size
         self.offset = 100
         self.half_offset = 50
-        self.refresh = 0.2
         self.quit = False
         self.again = False
         self.resolution = ( self.offset + size[0] * 50, \
@@ -76,35 +79,35 @@ class Interface( Thread ):
         ''' Sets the predator location on the screen '''
         self.predator_rect.left = (self.half_offset) + ( (location[0] % self.size[0] ) * 51) + 1
         self.predator_rect.top  = (self.half_offset) + ( (location[1] % self.size[1] ) * 51) + 1
-        time.sleep( self.refresh )
 
     def setPrey( self, location ):
         ''' Sets the prey location on the screen '''
         self.prey_rect.left = (self.half_offset) + ( (location[0] % self.size[0]) * 51) + 1
         self.prey_rect.top  = (self.half_offset) + ( (location[1] % self.size[1]) * 51) + 1
-        time.sleep( self.refresh )
-
-    def getStatus( self ):
-        ''' Returns the state of the GUI, if quitted it returns True '''
-        return self.quit
-
-    def getReload( self ):
-        again = self.again
-        self.again = False
-        return again
 
     def run( self ):
         ''' Updates the screen and checks for quit events '''
-        while 1 :
-            for e in pygame.event.get():
-                if e.type == pygame.QUIT:
-                    self.quit = True
+        self.E.valueIteration()
+        done = False
+        running = True
+ 
+        print "Start simulation"
+        while not(done):
+            # Run a step
+            if running:
+                self.E.run()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    done = True
                     break
-                elif e.type == pygame.KEYDOWN and e.key == pygame.K_r:
-                    self.again = True
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                    self.E.reset()
+                    running = True
 
-            if self.quit:
-                break
-
+            self.setPredator( self.E.predator.location )
+            self.setPrey( self.E.prey.location )
             self.__update()
-            time.sleep( self.refresh / 2 )
+            self.clock.tick(10)
+            if self.E.predator.location == self.E.prey.location:
+                running = False
