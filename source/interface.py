@@ -94,6 +94,7 @@ class Interface( Thread ):
             for e in pygame.event.get():
                 if e.type == QUIT:
                     self.quit = True
+                    pygame.quit()
                     sys.exit()
                 elif e.type == KEYDOWN and e.key == K_r:
                     self.again = True
