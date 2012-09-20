@@ -25,7 +25,7 @@ class EnvironmentReduced( Environment ):
         state_y = ( ( 5 + predator[1] - prey[1] ) % (self.height ) ) - 5
         return state_x, state_y
     
-    def getStates( self ):
+    def getStates(self):
         '''
         Gets the entire statespace in two sets, the first containing the 
         non-terminal states and the second containing terminal states, 
@@ -36,7 +36,7 @@ class EnvironmentReduced( Environment ):
         terminal_states = set()
         for i in xrange( -(self.width/2), self.width/2+1 ):
             for j in xrange( -(self.height/2), self.height/2+1 ):
-                s = (i, j)         
+                s = (i,j)         
                 if i == 0 and j == 0:
                     terminal_states.add( s )
                 else:
