@@ -7,8 +7,8 @@
 #
 # File:         environment.py
 # Description:  Base class of the environment.
-from predator import Predator
-from prey import Prey
+from Predator import Predator
+from Prey import Prey
 
 class Environment:
     '''
@@ -102,8 +102,8 @@ class Environment:
 
         # Define delta and theta
         delta = 0.2  
-        theta = 0.00 
-        discount = 0.7
+        theta = 0.0 
+        gamma = 0.7
         new_V = dict()
             
         # Policy evaluation
@@ -124,7 +124,7 @@ class Environment:
                     
                     # Find the action that maximizes the value
                     for s_prime in P:
-                        current_value +=  P[s_prime] * ( self.reward( s, a, s_prime ) + discount * V[s_prime] )
+                        current_value +=  P[s_prime] * ( self.reward( s, a, s_prime ) + gamma * V[s_prime] )
                 
                     if current_value > best_value:
                         best_value = current_value
@@ -149,12 +149,11 @@ class Environment:
         stable = False
         gamma = 0.7
         
-        
         while not stable:
             # Policy evaluation
             V = self.policyEvaluation()
             updated = 0
-            
+                
             # Policy improvement
             stable = True
             for s in self.S:
@@ -175,13 +174,17 @@ class Environment:
                     if value > best_value:
                         best_action = a
                         best_value = value
-                
+        
                 # Check policy stability
                 if best_action != policy_action:
+                    self.predator.updatePolicy( s, best_action )
+                    
                     updated += 1
                     stable = False
-                self.predator.updatePolicy( s, best_action )
             print 'Updated', updated, 'actions'
+            
+        # The last evaluation gives us the values of the optimal policy
+        V = self.policyEvaluation()
 
         return V
         

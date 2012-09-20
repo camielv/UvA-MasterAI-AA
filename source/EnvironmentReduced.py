@@ -9,6 +9,7 @@
 # Description:  Subclass of the environment, where a 2d state representation is
 #               used.
 
+
 from Environment import Environment
 
 class EnvironmentReduced( Environment ):
@@ -16,34 +17,32 @@ class EnvironmentReduced( Environment ):
     Creates an instance of the environment. Default an eleven by eleven grid
     is used. The default position for the prey is (5,5).
     '''
-    #def __init__(self, preyLocation=(5,5), predatorLocation=(0,0) ):
-    #    Environment.__init__(self)
 
-    def getState(self):
+    def getState( self ):
         predator = self.predator.location
         prey = self.prey.location
         state_x = ( ( 5 + predator[0] - prey[0] ) % (self.width ) ) - 5
         state_y = ( ( 5 + predator[1] - prey[1] ) % (self.height ) ) - 5
-        return state_x,state_y
+        return state_x, state_y
     
-    def getStates(self):
-       '''
-       Gets the entire statespace in two sets, the first containing the 
-       non-terminal states and the second containing terminal states, 
-       with reduced statespace. By taking distance to the prey in x- and 
-       y-direction as the 2d state, the statespace is reduced by a factor 121. 
-       '''
-       S = set()
-       terminal_states = set()
-       for i in xrange( -self.width/2, self.width/2+1 ):
-           for j in xrange( -self.height/2, self.height/2+1 ):
-                s = (i,j)         
+    def getStates( self ):
+        '''
+        Gets the entire statespace in two sets, the first containing the 
+        non-terminal states and the second containing terminal states, 
+        with reduced statespace. By taking distance to the prey in x- and 
+        y-direction as the 2d state, the statespace is reduced by a factor 121. 
+        '''
+        S = set()
+        terminal_states = set()
+        for i in xrange( -(self.width/2), self.width/2+1 ):
+            for j in xrange( -(self.height/2), self.height/2+1 ):
+                s = (i, j)         
                 if i == 0 and j == 0:
                     terminal_states.add( s )
                 else:
                     S.add( s )
 
-       return S, terminal_states
+        return S, terminal_states
 
     def reward( self, s, a, s_prime ):
         '''

@@ -41,7 +41,7 @@ def main():
 
         if GUI.getStatus():
             break
-
+    print 'd'
     # Wait for exit event in GUI.
     GUI.join()
 

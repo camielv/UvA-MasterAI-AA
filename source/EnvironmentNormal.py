@@ -40,7 +40,7 @@ class EnvironmentNormal( Environment ):
             for j in xrange( self.height ):
                 for k in xrange( self.width ):
                     for m in xrange( self.height ):
-                        s = (i,j,k,m)                 
+                        s = (i, j, k, m)                 
                         if i == k and j == m:
                             terminal_states.add( s )
                         else:
