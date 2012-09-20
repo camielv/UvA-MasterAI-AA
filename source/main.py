@@ -44,6 +44,7 @@ def main():
         
     # Wait for exit event in GUI.
     GUI.join()
+    del GUI
 
 # If this is the main script run main function
 if __name__ == '__main__':
