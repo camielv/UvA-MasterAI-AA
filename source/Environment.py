@@ -7,8 +7,8 @@
 #
 # File:         environment.py
 # Description:  Base class of the environment.
-from predator import Predator
-from prey import Prey
+from Predator import Predator
+from Prey import Prey
 
 class Environment:
     '''
@@ -33,6 +33,17 @@ class Environment:
         '''
         raise NotImplementedError
 
+    def reward( self, s, a, s_prime ):
+        '''
+        Returns the reward for a given future 4d state containing location of 
+        the predator and prey. In this case, state and action are actually 
+        redundant but are added for the sake of completeness. 
+        '''
+        raise NotImplementedError
+
+    def nextStates( self, s, a ):
+        raise NotImplementedError
+          
     def policyEvaluation( self, gamma = 0.8 ):
         '''
         Performs policyEvaluation for the given predator in this environment. 
@@ -78,17 +89,6 @@ class Environment:
         print 'Policy Evaluation took', i, 'iterations'
         return V
 
-    def reward( self, s, a, s_prime ):
-        '''
-        Returns the reward for a given future 4d state containing location of 
-        the predator and prey. In this case, state and action are actually 
-        redundant but are added for the sake of completeness. 
-        '''
-        raise NotImplementedError
-
-    def nextStates( self, s, a ):
-        raise NotImplementedError
-          
     def valueIteration( self, gamma = 0.7 ):    
         ''' 
         Perform value iteration for this environment. 
@@ -101,6 +101,7 @@ class Environment:
         # Define delta and theta
         delta = 0.2  
         theta = 0.0
+
         new_V = dict()
             
         # Policy evaluation
@@ -135,9 +136,27 @@ class Environment:
         
             # Store the new values
             V.update( new_V )
-        return V
+        return V        
         
-    def policyImprovement( self, V, gamma = 0.7 ):
+    def policyIteration( self, gamma=0.7 ):
+        '''
+        Performs policy iteration starting from the policy of the predator.
+        '''
+        # Initialization
+        stable = False
+                
+        while not stable:
+            # 1. Policy evaluation
+            V = self.policyEvaluation( gamma )
+            
+            # 2. Policy Improvement
+            stable = self.policyImprovement( V, gamma )
+        return V
+
+    def policyImprovement( self, V, gamma=0.7 ):
+        '''
+        Performs policy improvement, given the value function V.        
+        '''
         
         updated = 0
         stable = True
@@ -173,22 +192,6 @@ class Environment:
             
         print 'Updated', updated, 'actions'
         return stable
-        
-    def policyIteration( self, gamma = 0.7 ):
-        '''
-        Performs policy iteration starting from the policy of the predator.
-        '''
-        # Initialization
-        stable = False
-                
-        while not stable:
-            # 1. Policy evaluation
-            V = self.policyEvaluation( gamma )
-            
-            # 2. Policy Improvement
-            stable = self.policyImprovement( V, gamma )
-
-        return V
         
     def reset(self):
         self.prey.location = (5,5)

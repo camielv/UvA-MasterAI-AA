@@ -1,12 +1,21 @@
-# Autonomous Agents - 2012/2013
-# Team SuperAuke
+# Assignment:   Single Agent Planning
+# Course:       Autonomous Agents 2012-2013
+# Education:    Master Artificial Intelligence
+# By:           Steven Laan
+#               Auke Wiggers
+#               Camiel Verschoor
 #
-# predator.py
-# Base class for the predator (agent)
+# File:         Predator.py
+# Description:  Predator is a class containing properties of the agent, such as
+#               the policy, as well as functions that enable movement.
 
 import random
 
 class Predator():
+    '''
+    Creates an agent which contains a policy. Input are an environment object
+    and the location of the agent, which is (0,0) by default.    
+    '''
     
     ACTION_UP    = (-1, 0)
     ACTION_DOWN  = ( 1, 0)
@@ -45,7 +54,9 @@ class Predator():
         
         s_prime = performAction( s, a )
 
+        # If the 2D staterepresentation is used instead of the 4D one
         if reduced:          
+            # Use a different method to update the state
             new_x = self.location[0] - (s[0] - s_prime[0])
             new_y = self.location[1] - (s[1] - s_prime[1])
             
@@ -58,12 +69,14 @@ class Predator():
 
     def getAction( self, s ):
         '''
-        Get an action given the current state, using the policy
+        Get an action given the current state, using the policy. 
         '''
         random_number = random.random()
 
         cumulative_prob = 0.0
         
+        # For every action, check if the cumulative probability exceeds a 
+        # random number. 
         for a in self.actions:
             cumulative_prob += self.policy[(s,a)]
             if cumulative_prob >= random_number:                
@@ -90,13 +103,20 @@ class Predator():
         max_x = self.environment.width
         max_y = self.environment.height
 
+        # There are, for this environment, 3 cases per dimension:
         if old_x < 0:
+            # If the predator is not on the same y-axis as the prey, a move
+            # in horizontal direction will be either towards or away from 
+            # the prey, or a standstill.
             new_x = ((old_x + 5 + a[0]) % max_x)-5
         elif old_x > 0:
             new_x = ((old_x + 5 - a[0]) % max_x)-5
         elif old_x == 0:
+            # If it is on the same y-axis, any action in horizontal direction 
+            # will be a move away from the prey.
             new_x = -a[0]
             
+        # The same principle applies to moves in vertical direction
         if old_y < 0:
             new_y = ((old_y + 5 + a[1]) % max_y)-5
         elif old_y > 0:
@@ -106,11 +126,16 @@ class Predator():
 
         return (new_x, new_y)
 
-    def updatePolicy(self, s, new_a):
+    def updatePolicy(self, s, best_a):
+        '''
+        Given a state and the best action, this function sets the predators 
+        policy so that in state s, the probability of taking action best_a is
+        1.0 and probabilities of taking any other actions are (of course) 0. 
+        '''
         # Set probabilities of all actions to 0
         for a in self.actions:
             self.policy[(s,a)] = 0.0
             
         # Give the new action for this state a probability of 1
-        self.policy[(s,new_a)] = 1.0
+        self.policy[(s,best_a)] = 1.0
         

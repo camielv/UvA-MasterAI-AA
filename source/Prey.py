@@ -1,12 +1,23 @@
-# Autonomous Agents - 2012/2013
-# Team SuperAuke
+# Assignment:   Single Agent Planning
+# Course:       Autonomous Agents 2012-2013
+# Education:    Master Artificial Intelligence
+# By:           Steven Laan
+#               Auke Wiggers
+#               Camiel Verschoor
 #
-# prey.py
-# Base class for the prey
+# File:         Prey.py
+# Description:  Prey is a class containing properties of the prey, such as
+#               the functions that enable movement. Prey is actually a part of 
+#               the environment, but was implemented so that multiple preys 
+#               would be possible in future assignments.
 
 import random
 
 class Prey():
+    '''
+    Creates an instance of prey. Input are an environment object and the 
+    location of the prey in this environment, which is (5,5) by default.    
+    '''
 
     ACTION_UP = (-1,0)
     ACTION_DOWN = (1,0)
@@ -15,7 +26,11 @@ class Prey():
     ACTION_STAY = (0,0)
     
     location = None
-    actions = set([ACTION_UP, ACTION_DOWN, ACTION_RIGHT, ACTION_LEFT, ACTION_STAY])
+    actions = set([ACTION_UP, 
+                   ACTION_DOWN, 
+                   ACTION_RIGHT, 
+                   ACTION_LEFT, 
+                   ACTION_STAY])
     
     def __init__(self, environment, location):
         """
@@ -33,7 +48,7 @@ class Prey():
         """        
  
         # Determine which function should be used based on a boolean 'reduced'.
-        # If the boolean is true, the reduced statespace will be used. 
+        # If the boolean is true, the 2D state representation will be used. 
         if reduced:
             getPossibleStates = self.getPossibleStatesReduced
         else:
@@ -44,6 +59,7 @@ class Prey():
         # Between 0 and 1, used to determine the current action
         random_number = random.random()
         
+        # Pick an action based on the number
         cumulative_prob = 0
         for s_prime in possible_states:
             cumulative_prob +=  possible_states[s_prime]
@@ -62,32 +78,41 @@ class Prey():
                 
     def performAction(self, s, a):
         '''
-        Perform a move given the current state        
+        Perform a move given the current 4D state s and action a. Returns the 
+        next 2D state.
         '''        
         old_x, old_y = s[2], s[3]        
         new_x = (old_x + a[0]) % self.environment.width
         new_y = (old_y + a[1]) % self.environment.height
 
-        return (s[0], s[1], new_x, new_y)
+        s_prime = (s[0], s[1], new_x, new_y)
+        
+        return s_prime
 
     def performActionReduced( self, s, a ):
-        ''' 
-        Update the reduced state based on a given a. 
         '''
-        d_x, d_y  = a
-        
+        Perform a move given the current 2D state s and action a. Returns the 
+        next 2D state.
+        '''        
         old_x, old_y = s
 
         max_x = self.environment.width
         max_y = self.environment.height
 
+        # There are, for this environment, 3 cases per dimension:
         if old_x > 0:
+            # When the predator is not on the same vertical axis, an action can
+            # be a move away from or towards the predator, or the prey can 
+            # stand still
             new_x = ((old_x + 5 - a[0]) % max_x)-5
         elif old_x < 0:
             new_x = ((old_x + 5 + a[0]) % max_x)-5
         elif old_x == 0:
+            # If the prey is already aligned, a moving action is always away
+            # from the predator.
             new_x = a[0]
             
+        # The same principle applies to moves in vertical direction. 
         if old_y > 0:
             new_y = ((old_y + 5 - a[1]) % max_y)-5
         elif old_y < 0:

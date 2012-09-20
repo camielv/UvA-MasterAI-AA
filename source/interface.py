@@ -24,10 +24,12 @@ class Interface( Thread ):
         # Setup the main screen
         self.size = size
         self.offset = 100
+        self.half_offset = 50
         self.refresh = 0.2
         self.quit = False
         self.again = False
-        self.resolution = ( self.offset + size[0] * 50, self.offset + size[1] * 50 )
+        self.resolution = ( self.offset + size[0] * 50, \
+                           self.offset + size[1] * 50 )
         self.screen = pygame.display.set_mode( self.resolution )
         pygame.display.set_caption( 'Autonomous Agents: Predator vs. Prey' )
 
@@ -40,21 +42,21 @@ class Interface( Thread ):
         # Predator sprite
         self.predator = pygame.image.load( "images/predator.png" ).convert()
         self.predator_rect = self.predator.get_rect()
-        self.predator_rect.left = (self.offset / 2) + (s[0] * 51) + 1
-        self.predator_rect.top  = (self.offset / 2) + (s[1] * 51) + 1
+        self.predator_rect.left = (self.half_offset) + (s[0] * 51) + 1
+        self.predator_rect.top  = (self.half_offset) + (s[1] * 51) + 1
 
         # Prey sprite
         self.prey = pygame.image.load( "images/prey.png" ).convert()
         self.prey_rect = self.prey.get_rect()
-        self.prey_rect.left = (self.offset / 2) + (s[2] * 51) + 1
-        self.prey_rect.top  = (self.offset / 2) + (s[3] * 51) + 1
+        self.prey_rect.left = (self.half_offset) + (s[2] * 51) + 1
+        self.prey_rect.top  = (self.half_offset) + (s[3] * 51) + 1
 
     def __drawBoard( self ):
         ''' Draws the board '''
         for i in range( self.size[0] + 1 ):
-            pygame.draw.line( self.background, (0, 0, 0), ( self.offset / 2, self.offset / 2 + i * 51), ( self.offset / 2 + self.size[1] * 51, self.offset / 2 + i * 51) )
+            pygame.draw.line( self.background, (0, 0, 0), ( self.half_offset, self.half_offset + i * 51), ( self.half_offset + self.size[1] * 51, self.half_offset + i * 51) )
         for i in range( self.size[1] + 1 ):
-            pygame.draw.line( self.background, (0, 0, 0), ( self.offset / 2 + i * 51, self.offset / 2), ( self.offset /2 + i * 51, self.offset / 2 + self.size[0] * 51) )
+            pygame.draw.line( self.background, (0, 0, 0), ( self.half_offset + i * 51, self.half_offset), ( self.offset /2 + i * 51, self.half_offset + self.size[0] * 51) )
 
     def __update( self ):
         ''' Updates the location of the predator and the prey on the screen '''
@@ -69,14 +71,14 @@ class Interface( Thread ):
 
     def setPredator( self, location ):
         ''' Sets the predator location on the screen '''
-        self.predator_rect.left = (self.offset / 2) + ( (location[0] % self.size[0] ) * 51) + 1
-        self.predator_rect.top  = (self.offset / 2) + ( (location[1] % self.size[1] ) * 51) + 1
+        self.predator_rect.left = (self.half_offset) + ( (location[0] % self.size[0] ) * 51) + 1
+        self.predator_rect.top  = (self.half_offset) + ( (location[1] % self.size[1] ) * 51) + 1
         time.sleep( self.refresh )
 
     def setPrey( self, location ):
         ''' Sets the prey location on the screen '''
-        self.prey_rect.left = (self.offset / 2) + ( (location[0] % self.size[0]) * 51) + 1
-        self.prey_rect.top  = (self.offset / 2) + ( (location[1] % self.size[1]) * 51) + 1
+        self.prey_rect.left = (self.half_offset) + ( (location[0] % self.size[0]) * 51) + 1
+        self.prey_rect.top  = (self.half_offset) + ( (location[1] % self.size[1]) * 51) + 1
         time.sleep( self.refresh )
 
     def getStatus( self ):
