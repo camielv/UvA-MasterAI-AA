@@ -51,6 +51,9 @@ class Interface( Thread ):
         self.prey_rect.left = (self.half_offset) + (s[2] * 51) + 1
         self.prey_rect.top  = (self.half_offset) + (s[3] * 51) + 1
 
+    def __del__( self ):
+        pygame.quit()
+
     def __drawBoard( self ):
         ''' Draws the board '''
         for i in range( self.size[0] + 1 ):
@@ -94,12 +97,14 @@ class Interface( Thread ):
         ''' Updates the screen and checks for quit events '''
         while 1 :
             for e in pygame.event.get():
-                if e.type == QUIT:
+                if e.type == pygame.QUIT:
                     self.quit = True
-                    pygame.quit()
-                    sys.exit()
-                elif e.type == KEYDOWN and e.key == K_r:
+                    break
+                elif e.type == pygame.KEYDOWN and e.key == pygame.K_r:
                     self.again = True
+
+            if self.quit:
+                break
 
             self.__update()
             time.sleep( self.refresh / 2 )
