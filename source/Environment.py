@@ -178,10 +178,9 @@ class Environment:
                 
                 # Check policy stability
                 if best_action != policy_action:
-                    self.predator.updatePolicy( s, best_action )
-                    
                     updated += 1
                     stable = False
+                self.predator.updatePolicy( s, best_action )
             print 'Updated', updated, 'actions'
 
         return V
