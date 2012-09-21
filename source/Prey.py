@@ -128,11 +128,14 @@ class Prey():
         '''
         Get the possible moves for a prey given the current state        
         '''
+        
+        # If in a terminal state, there is no probability of being in another
+        # state
         possible_states = dict()
         if s in self.environment.terminal_states:
             possible_states[s] = 1
             return possible_states
-            
+        # Otherwise, check if the prey does not run into the predator    
         for a in self.actions:
             s_prime = self.performAction( s, a )
             if not s_prime in self.environment.terminal_states:
@@ -150,11 +153,13 @@ class Prey():
         '''
         Get the possible moves for a prey given the current reduced state     
         '''
+        # If in a terminal state, there is no probability of being in another
+        # state
         possible_states = dict()
         if s in self.environment.terminal_states:
             possible_states[s] = 1
             return possible_states
-
+        # Otherwise, check if the prey does not run into the predator    
         for a in self.actions:            
             # determine the new location based on environment borders
             s_prime = self.performActionReduced( s, a )

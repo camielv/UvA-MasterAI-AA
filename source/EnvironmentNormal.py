@@ -15,12 +15,11 @@ class EnvironmentNormal( Environment ):
     Creates an instance of the environment. Default an eleven by eleven grid
     is used. The default position for the prey is (5,5).
     '''
-    #def __init__( self, preyLocation=(5,5), predatorLocation=(0,0) ):
-    #    Environment.__init__(self)
-        
     
     def getState( self ):
-        '''Returns the current environment state.'''
+        '''
+        Returns the current environment state.
+        '''
         # Create state
         predator_x, predator_y = self.predator.location
         prey_x, prey_y = self.prey.location
@@ -58,11 +57,17 @@ class EnvironmentNormal( Environment ):
         return 0
 
     def nextStates( self, s, a ):
+        '''
+        Determines all possible next states s' given the current state s and 
+        action a.         
+        '''
         new_state = self.predator.performAction( s, a )
         return self.prey.getPossibleStates( new_state )
         
     def run( self ):
-        '''Performs one step of the simulation.'''
+        '''
+        Performs one step of the simulation.
+        '''
         # Retrieve the state
         s = self.getState()
         
