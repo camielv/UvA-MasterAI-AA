@@ -10,6 +10,7 @@
 #               the policy, as well as functions that enable movement.
 
 import random
+from itertools import izip
 
 argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]
 
@@ -152,7 +153,7 @@ class Predator():
 
         for s in self.environment.getStates():
             for a in self.actions:
-                Q(s,a) = 15
+                Q[s][a] = 15
 
         for n in range( episodes ):
             # Initialize Q
@@ -237,7 +238,7 @@ class Predator():
             self.policy[(s,a)] = uniform_epsilon
             
         # Give the new action for this state a probability of 1
-        self.policy[(s,best_a)] = 1 - epsilon
+        self.policy[(s,best_a)] += 1 - epsilon
       
     def takeAction(self, s, a):
         ''' 
@@ -257,11 +258,10 @@ class Predator():
     def onPolicyMonteCarloControl( self ):
         
          # Initialize parameters        
-        alpha = 0.3
-        gamma = 0.8        
+        epsilon = 0.1        
         
         # Initialize S and V
-        S = self.environment.getStates()
+        S,_ = self.environment.getStates()
         A = self.actions
 
         # Create dictionaries for Q and Returns
@@ -273,31 +273,37 @@ class Predator():
             for a in A:
                 Q[s][a] = 0
                 Returns[(s,a)] = []
-                self.policy([s,a]) = 1 / len( A )
+                self.policy[(s,a)] = 1.0 / len( A )
                 
         s_start = (5,5)
+        max_iter = 100        
+        i = 0
+        forever = True
         
-        while True:
-            
+        while forever:
+            print i
+            i += 1
+            forever = i < max_iter
             prey_caught = False
             episode = []
             s = s_start
-            R = 0
+            R = 0.0
             
             # (a) Generate episode using the current policy
             while not prey_caught:
                 a = self.getAction( s )
-                r, prey_caught, s_prime = self.takeAction( s, a )
+                r, s_prime, prey_caught = self.takeAction( s, a )
                 R += r
-                
                 episode.append( (s,a) )
+                s = s_prime
             
             # (b) For each pair (s,a) in the episode
             for s,a in episode:
-                Returns[(s,a)] += R
+                Returns[(s,a)].append( R )
                 Q[s][a] = sum( Returns[(s,a)] ) / len( Returns[(s,a)] )
             
             # (c) For each s in the episode
             for s,_ in episode:
                 a_star = argmax( Q[s] )
-        
+                
+                self.updatePolicyEpsilonGreedy( s, a_star, epsilon )
