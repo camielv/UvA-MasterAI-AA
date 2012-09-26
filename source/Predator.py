@@ -166,38 +166,56 @@ class Predator():
             print "Episodes: ", n
 
             # Current state
-            s = (5,5)
-            
+            s = ( random.randint(-5,5), random.randint(-5,5) )
             prey_caught = False
-            a = 0
-            a_prime = 0
 
-            max_Q = 0
             # Determine which action maximizes Q(s,a)
-            for possible_a in self.actions:
-                if Q[s][possible_a] > max_Q:
-                    max_Q = Q[s][possible_a]
-                    a = possible_a
+            a = self.deriveActionSarsa(Q, s, epsilon)
 
             while not prey_caught:
                 # Take action a, observe r and s_prime
                 r, s_prime, prey_caught = self.takeAction(s, a)
                 
                 # Determine which next action maximizes Q(s',a')
-                max_Q = 0
-                for possible_a in self.actions:
-                    if Q[s_prime][a] > max_Q:
-                        max_Q = Q[s_prime][possible_a]
-                        a_prime = possible_a
+                a_prime = self.deriveActionSarsa(Q, s, epsilon)
 
                 # Update Q
-                Q[s][a] = Q[s][a] + alpha * (r + gamma * max_Q - Q[s][a])
+                Q[s][a] = Q[s][a] + alpha * (r + gamma * Q[s_prime][a_prime] - Q[s][a])
 
                 # Update state and action
                 s = s_prime
                 a = a_prime
-
         return Q
+
+    def deriveActionSarsa(self, Q, s, epsilon):
+        # Find the action that maximizes Q[(s, a)]
+        max_Q = 0
+        best_a = None
+        prob_actions = dict()        
+        uniform_epsilon = epsilon / (len(self.actions)-1)
+        
+        for possible_a in self.actions:
+            # Set probabilities of all actions uniformly
+            prob_actions[(s,possible_a)] = uniform_epsilon
+            if Q[s][possible_a] > max_Q:
+                max_Q = Q[s][possible_a]
+                best_a = possible_a
+        
+        # Update policy of predator
+        self.updatePolicyEpsilonGreedy( s, best_a, epsilon )
+
+        # Give the best action for this state a probability of 1
+        prob_actions[(s,best_a)] += 1 - epsilon
+
+        # For every action, check if the cumulative probability exceeds a 
+        # random number. 
+        random_number = random.random()
+        cumulative_prob = 0.0
+        
+        for a in self.actions:
+            cumulative_prob += prob_actions[(s,a)]
+            if cumulative_prob >= random_number:                
+                return a
 
     def qLearning(self, alpha=0.1, gamma=0.1, epsilon=0.1, episodes=1000):
         '''
