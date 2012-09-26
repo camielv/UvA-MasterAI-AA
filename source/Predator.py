@@ -144,23 +144,59 @@ class Predator():
         '''
         This function implements Sarsa
         '''
-        # Settings of learning
+        # Learning rate
         alpha = 0.3
+        # Discount factor
         gamma = 1.0
-        epsilon = 0.01
+        # Epislon used for epsilon-greedy policy generation
+        epsilon = 0.1
+        # Amount of episodes for learning
         episodes = 100
 
-        for s in self.environment.getStates():
+        # Initialize Q
+        Q = dict()
+
+        for s in self.environment.S | self.environment.terminal_states:
+            Q[s] = dict()
             for a in self.actions:
-                Q(s,a) = 15
+                Q[s][a] = 15
 
         for n in range( episodes ):
-            # Initialize Q
-            Q = dict()
-
+            print "Episodes: ", n
 
             # Current state
             s = (5,5)
+            
+            prey_caught = False
+            a = 0
+            a_prime = 0
+
+            max_Q = 0
+            # Determine which action maximizes Q(s,a)
+            for possible_a in self.actions:
+                if Q[s][possible_a] > max_Q:
+                    max_Q = Q[s][possible_a]
+                    a = possible_a
+
+            while not prey_caught:
+                # Take action a, observe r and s_prime
+                r, s_prime, prey_caught = self.takeAction(s, a)
+                
+                # Determine which next action maximizes Q(s',a')
+                max_Q = 0
+                for possible_a in self.actions:
+                    if Q[s_prime][a] > max_Q:
+                        max_Q = Q[s_prime][possible_a]
+                        a_prime = possible_a
+
+                # Update Q
+                Q[s][a] = Q[s][a] + alpha * (r + gamma * max_Q - Q[s][a])
+
+                # Update state and action
+                s = s_prime
+                a = a_prime
+
+        return Q
 
     def qLearning(self):
         # Learning rate
@@ -273,7 +309,7 @@ class Predator():
             for a in A:
                 Q[s][a] = 0
                 Returns[(s,a)] = []
-                self.policy([s,a]) = 1 / len( A )
+                self.policy[(s,a)] = 1 / len( A )
                 
         s_start = (5,5)
         
