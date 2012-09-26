@@ -138,3 +138,95 @@ class Predator():
         # Give the new action for this state a probability of 1
         self.policy[(s,best_a)] = 1.0
         
+    def qLearning(self):
+        # Learning rate
+        alpha = 0.1
+        # Discount factor        
+        gamma = 0.1
+        # Epsilon used for epsilon-greedy policy generation
+        epsilon = 0.1
+
+
+        # Initialize Q            
+        Q = dict()
+        for s in self.environment.S | self.environment.terminal_states:
+            for a in self.actions:
+                Q[(s,a)] = 15
+        print Q[((0,0), (0,1))]
+            
+        # For a number of episodes
+        for n in range(100):
+            print 'Episode', n, '.'            
+            
+            # Initialize s
+            s = (5,5)
+
+            prey_caught = False
+            
+            # Run through one episode
+            while not prey_caught:                
+                # Choose a from s using policy derived from Q (epsilon greedy)
+                a = self.deriveAction(Q, s, epsilon)
+                
+                # Take action a, observe r, s_prime
+                r, s_prime, prey_caught = self.takeAction(s, a)                
+                
+                # Determine which action maximizes Q(s,a)
+                max_Q = 0
+                for possible_a in self.actions:
+                    if Q[(s_prime, possible_a)] > max_Q:
+                        max_Q = Q[(s_prime, possible_a)]
+                
+                # Update Q
+                Q[(s,a)] = Q[(s,a)] + alpha * (r + gamma * max_Q - Q[(s,a)])
+
+                # Update the state        
+                s = s_prime
+        # Return the found Qvalues
+        return Q
+     
+    def deriveAction(self, Q, s, epsilon):
+        # Find the action that maximizes Q[(s, a)]
+        max_Q = 0
+        best_a = None
+        
+        for possible_a in self.actions:
+            if Q[(s, possible_a)] > max_Q:
+                max_Q = Q[(s, possible_a)]
+                best_a = possible_a
+        # Update the policy based on the found best action
+        self.updatePolicyEpsilonGreedy(s, best_a, epsilon)
+        # Sample from this policy
+        return self.getAction(s)
+
+    def updatePolicyEpsilonGreedy(self, s, best_a, epsilon):
+        '''
+        Given a state and the best action, this function sets the predators 
+        policy so that in state s, the probability of taking action best_a is
+        1.0 and probabilities of taking any other actions are (of course) 0. 
+        '''
+        
+        uniform_epsilon = epsilon / (len(self.actions)-1)
+
+        # Set probabilities of all actions except the best action uniformly
+        for a in self.actions:
+            self.policy[(s,a)] = uniform_epsilon
+            
+        # Give the new action for this state a probability of 1
+        self.policy[(s,best_a)] = 1 - epsilon
+      
+    def takeAction(self, s, a):
+        ''' 
+        Perform one step of the episode, given the current state and an action.
+        '''
+        # Udpate the state based on the predator's action
+        s_new = self.performActionReduced(s, a)
+        # Choose an action for the prey
+        s_prime = self.environment.prey.simulateAction( s_new, reduced=True )
+        # Determine the reward for the state-action-next_state pair
+        r = self.environment.reward(s, a, s_prime)
+        # Check if the found state is terminal
+        terminal = s_prime in self.environment.terminal_states
+        
+        return r, s_prime, terminal
+        
