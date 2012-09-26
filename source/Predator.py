@@ -110,7 +110,7 @@ class Predator():
             # If the predator is not on the same y-axis as the prey, a move
             # in horizontal direction will be either towards or away from 
             # the prey, or a standstill.
-            new_x = ((old_x + 5 + a[0]) % max_x)-5
+            new_x = ((old_x + 5 - a[0]) % max_x)-5
         elif old_x > 0:
             new_x = ((old_x + 5 - a[0]) % max_x)-5
         elif old_x == 0:
@@ -119,8 +119,8 @@ class Predator():
             new_x = -a[0]
             
         # The same principle applies to moves in vertical direction
-        if old_y < 0:
-            new_y = ((old_y + 5 + a[1]) % max_y)-5
+        if old_y < 0:   
+            new_y = ((old_y + 5 - a[1]) % max_y)-5
         elif old_y > 0:
             new_y = ((old_y + 5 - a[1]) % max_y)-5
         elif old_y == 0:
@@ -163,7 +163,8 @@ class Predator():
                 Q[s][a] = 15
 
         for n in range( episodes ):
-            print "Episodes: ", n
+            if n%1000 == 0:
+                print "Episodes: ", n
 
             # Current state
             s = ( random.randint(-5,5), random.randint(-5,5) )
@@ -231,21 +232,21 @@ class Predator():
                 Q[s][a] = 15
             
         # For a number of episodes
-        for n in range(episodes):
-            print 'Episode {0}.'.format(n)            
+        for n in range(1,episodes+1):
+            if n % 1000 == 0:
+                print 'Episode {0}.'.format(n)            
             
             # Initialize s
-            s = (5,5)
+            s = (random.randint(-5,5), random.randint(-5,5))
 
             prey_caught = False
             
             # Run through one episode
-            while not prey_caught:                
+            while not prey_caught:      
+                
                 # Choose a from s using policy derived from Q (epsilon greedy)
                 a = self.deriveAction(Q, s, epsilon)
                 
-                print 'action', a
-
                 # Take action a, observe r, s_prime
                 r, s_prime, prey_caught = self.takeAction(s, a)                
                 
@@ -268,17 +269,14 @@ class Predator():
         max_Q = 0
         best_a = None
         prob_actions = dict()        
-        uniform_epsilon = epsilon / (len(self.actions)-1)
-        
+        uniform_epsilon = epsilon / (len(self.actions))
         
         for possible_a in self.actions:
             if Q[s][possible_a] > max_Q:
-                
-                # Set probabilities of all actions uniformly
-                prob_actions[(s,possible_a)] = uniform_epsilon
-                
                 max_Q = Q[s][possible_a]
                 best_a = possible_a
+            # Set probabilities of all actions uniformly
+            prob_actions[(s,possible_a)] = uniform_epsilon
         
         # Give the best action for this state a probability of 1
         prob_actions[(s,best_a)] += 1 - epsilon
