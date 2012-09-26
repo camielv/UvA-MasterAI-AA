@@ -11,6 +11,8 @@
 
 import random
 
+argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]
+
 class Predator():
     '''
     Creates an agent which contains a policy. Input are an environment object
@@ -138,3 +140,49 @@ class Predator():
         # Give the new action for this state a probability of 1
         self.policy[(s,best_a)] = 1.0
         
+    def onPolicyMonteCarloControl( self ):
+        
+         # Initialize parameters        
+        alpha = 0.3
+        gamma = 0.8        
+        
+        # Initialize S and V
+        S = self.environment.getStates()
+        A = self.actions
+
+        # Create dictionaries for Q and Returns
+        Q = dict()
+        Returns = dict()
+        
+        for s in S:
+            Q[s] = dict()
+            for a in A:
+                Q[s][a] = 0
+                Returns[(s,a)] = []
+                self.policy([s,a]) = 1 / len( A )
+                
+        s_start = (5,5)
+        
+        while True:
+            
+            prey_caught = False
+            episode = []
+            s = s_start
+            R = 0
+            
+            # (a) Generate episode using the current policy
+            while not prey_caught:
+                a = self.getAction( s )
+                r, prey_caught, s_prime = self.takeAction( s, a )
+                R += r
+                
+                episode.append( (s,a) )
+            
+            # (b) For each pair (s,a) in the episode
+            for s,a in episode:
+                Returns[(s,a)] += R
+                Q[s][a] = sum( Returns[(s,a)] ) / len( Returns[(s,a)] )
+            
+            # (c) For each s in the episode
+            for s,_ in episode:
+                a_star = argmax( Q[s] )
