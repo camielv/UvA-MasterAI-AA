@@ -1,4 +1,4 @@
-# Assignment:   Single Agent Planning
+# Assignment:   Single Agent Learning
 # Course:       Autonomous Agents 2012-2013
 # Education:    Master Artificial Intelligence
 # By:           Steven Laan
@@ -137,4 +137,27 @@ class Predator():
             
         # Give the new action for this state a probability of 1
         self.policy[(s,best_a)] = 1.0
-        
+       
+    def Sarsa( self ):
+        '''
+        This function implements 
+        '''
+        # Settings of learning
+        alpha = 0.3
+        gamma = 1.0
+        epsilon = 0.01
+        episodes = 100
+
+
+        for s in self.environment.S
+            for a in self.actions
+                Q(s,a) = 15
+
+        for n in range( episodes ):
+            # Initialize Q
+            Q = dict()
+
+
+            # Current state
+            s = (5,5)
+
