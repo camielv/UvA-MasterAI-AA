@@ -10,6 +10,8 @@
 from Predator import Predator
 from Prey import Prey
 
+import time
+
 class Environment:
     '''
     Creates an instance of the environment. Default an eleven by eleven grid
@@ -48,7 +50,7 @@ class Environment:
         '''
         Performs policyEvaluation for the given predator in this environment. 
         '''
-
+        
         V = dict()
         # For every state in the statespace including terminal states
         for s in self.S | self.terminal_states:
@@ -93,6 +95,9 @@ class Environment:
         ''' 
         Perform value iteration for this environment. 
         '''        
+        now = time.time()
+        
+        iterations = 0        
         
         V = dict()
         for s in self.S | self.terminal_states:
@@ -106,6 +111,7 @@ class Environment:
             
         # Policy evaluation
         while delta > theta:
+            iterations += 1
             delta = 0
             for s in self.S:
                 new_V[s] = 0                     
@@ -136,12 +142,16 @@ class Environment:
         
             # Store the new values
             V.update( new_V )
+        print 'Number of iterations for discount', gamma, ' :', iterations
+        print 'Time taken (seconds): ', time.time() - now
         return V        
         
     def policyIteration( self, gamma=0.7 ):
         '''
         Performs policy iteration starting from the policy of the predator.
         '''
+        now = time.time()
+        
         # Initialization
         stable = False
                 
@@ -151,6 +161,8 @@ class Environment:
             
             # 2. Policy Improvement
             stable = self.policyImprovement( V, gamma )
+
+        print 'Time taken (seconds): ', time.time() - now
         return V
 
     def policyImprovement( self, V, gamma=0.7 ):
@@ -194,5 +206,9 @@ class Environment:
         return stable
         
     def reset(self):
+        '''
+        Reset the position of the prey and predator in this environment.        
+        '''
         self.prey.location = (5,5)
         self.predator.location = (0,0)
+        

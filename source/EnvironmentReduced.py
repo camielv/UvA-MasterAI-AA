@@ -57,15 +57,17 @@ class EnvironmentReduced( Environment ):
 
     def nextStates( self, s, a ):
         '''
-        Determine the next possible states given the current state and 
-        action the predator takes.         
+        Determine the next possible states given the current state s and 
+        action a.         
         '''
         new_state = self.predator.performActionReduced( s, a )
         return self.prey.getPossibleStatesReduced( new_state )
         
         
     def run( self ):
-        '''Performs one step of the simulation.'''
+        '''
+        Performs one step of the simulation.
+        '''
         # Retrieve the state
         s = self.getState()
         
