@@ -150,37 +150,32 @@ class Predator():
         epsilon = 0.01
         episodes = 100
 
+        # Initialize Q
+        Q = dict()
         for s in self.environment.getStates():
             for a in self.actions:
-                Q(s,a) = 15
+                Q[(s,a)] = 15
 
         for n in range( episodes ):
-            # Initialize Q
-            Q = dict()
-
-
             # Current state
             s = (5,5)
 
-    def qLearning(self):
-        # Learning rate
-        alpha = 0.1
-        # Discount factor        
-        gamma = 0.1
-        # Epsilon used for epsilon-greedy policy generation
-        epsilon = 0.1
-
-
+    def qLearning(self, alpha=0.1, gamma=0.1, epsilon=0.1, episodes=1000):
+        '''
+        Implementation of Q-learning given the learning rate alpha, discount
+        factor gamma, epsilon for epsilon-greedy policy, and the number of 
+        episodes.
+        '''
         # Initialize Q            
         Q = dict()
         for s in self.environment.S | self.environment.terminal_states:
+            Q[s] = dict()            
             for a in self.actions:
-                Q[(s,a)] = 15
-        print Q[((0,0), (0,1))]
+                Q[s][a] = 15
             
         # For a number of episodes
-        for n in range(100):
-            print 'Episode', n, '.'            
+        for n in range(episodes):
+            print 'Episode {0}.'.format(n)            
             
             # Initialize s
             s = (5,5)
@@ -192,18 +187,20 @@ class Predator():
                 # Choose a from s using policy derived from Q (epsilon greedy)
                 a = self.deriveAction(Q, s, epsilon)
                 
+                print 'action', a
+
                 # Take action a, observe r, s_prime
                 r, s_prime, prey_caught = self.takeAction(s, a)                
                 
                 # Determine which action maximizes Q(s,a)
                 max_Q = 0
                 for possible_a in self.actions:
-                    if Q[(s_prime, possible_a)] > max_Q:
-                        max_Q = Q[(s_prime, possible_a)]
+                    if Q[s_prime][possible_a] > max_Q:
+                        max_Q = Q[s_prime][possible_a]
                 
                 # Update Q
-                Q[(s,a)] = Q[(s,a)] + alpha * (r + gamma * max_Q - Q[(s,a)])
-
+                Q[s][a] = Q[s][a] + alpha * (r + gamma * max_Q - Q[s][a])
+               
                 # Update the state        
                 s = s_prime
         # Return the found Qvalues
@@ -213,15 +210,31 @@ class Predator():
         # Find the action that maximizes Q[(s, a)]
         max_Q = 0
         best_a = None
+        prob_actions = dict()        
+        uniform_epsilon = epsilon / (len(self.actions)-1)
+        
         
         for possible_a in self.actions:
-            if Q[(s, possible_a)] > max_Q:
-                max_Q = Q[(s, possible_a)]
+            if Q[s][possible_a] > max_Q:
+                
+                # Set probabilities of all actions uniformly
+                prob_actions[(s,possible_a)] = uniform_epsilon
+                
+                max_Q = Q[s][possible_a]
                 best_a = possible_a
-        # Update the policy based on the found best action
-        self.updatePolicyEpsilonGreedy(s, best_a, epsilon)
-        # Sample from this policy
-        return self.getAction(s)
+        
+        # Give the best action for this state a probability of 1
+        prob_actions[(s,best_a)] += 1 - epsilon
+                    
+        # For every action, check if the cumulative probability exceeds a 
+        # random number. 
+        random_number = random.random()
+        cumulative_prob = 0.0
+        
+        for a in self.actions:
+            cumulative_prob += prob_actions[(s,a)]
+            if cumulative_prob >= random_number:                
+                return a
 
     def updatePolicyEpsilonGreedy(self, s, best_a, epsilon):
         '''
@@ -237,7 +250,7 @@ class Predator():
             self.policy[(s,a)] = uniform_epsilon
             
         # Give the new action for this state a probability of 1
-        self.policy[(s,best_a)] = 1 - epsilon
+        self.policy[(s,best_a)] += 1 - epsilon
       
     def takeAction(self, s, a):
         ''' 
@@ -273,7 +286,7 @@ class Predator():
             for a in A:
                 Q[s][a] = 0
                 Returns[(s,a)] = []
-                self.policy([s,a]) = 1 / len( A )
+                self.policy[(s,a)] = 1 / len( A )
                 
         s_start = (5,5)
         
