@@ -152,7 +152,7 @@ class Predator():
         # Epislon used for epsilon-greedy policy generation
         epsilon = 0.1
         # Amount of episodes for learning
-        episodes = 100
+        episodes = 1000
 
         # Initialize Q
         Q = dict()
