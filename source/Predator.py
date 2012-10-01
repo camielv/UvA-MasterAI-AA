@@ -11,10 +11,6 @@
 
 import random
 from itertools import izip
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib
-from scipy import interpolate
 import time
 
 argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]
@@ -38,10 +34,10 @@ class Predator():
     
     def __init__( self, environment, location=(0,0) ):
         self.location = location
-        self.environment = environment
+        self.Environment = environment
         # For every non-terminal state in the statespace, determine the 
         # possible actions and their probabilities.
-        for s in self.environment.S:
+        for s in self.Environment.S:
             for a in self.actions:
                 self.policy[(s,a)] = 0.2
                     
@@ -67,8 +63,8 @@ class Predator():
             new_x = self.location[0] - (s[0] - s_prime[0])
             new_y = self.location[1] - (s[1] - s_prime[1])
             
-            new_x = new_x % self.environment.width
-            new_y = new_y % self.environment.height
+            new_x = new_x % self.Environment.width
+            new_y = new_y % self.Environment.height
             self.location = (new_x, new_y)
         else:
             self.location = (s_prime[0], s_prime[1])
@@ -95,8 +91,8 @@ class Predator():
         '''
         x,y = s[0],s[1]
         
-        new_x = (x + a[0]) % self.environment.width
-        new_y = (y + a[1]) % self.environment.height
+        new_x = (x + a[0]) % self.Environment.width
+        new_y = (y + a[1]) % self.Environment.height
        
         return ( new_x, new_y, s[2], s[3] )
 
@@ -107,8 +103,8 @@ class Predator():
         d_x, d_y  = a
         old_x, old_y = s
 
-        max_x = self.environment.width
-        max_y = self.environment.height
+        max_x = self.Environment.width
+        max_y = self.Environment.height
 
         # There are, for this environment, 3 cases per dimension:
         if old_x < 0:
@@ -162,7 +158,7 @@ class Predator():
         # Initialize Q
         Q = dict()
 
-        for s in self.environment.S | self.environment.terminal_states:
+        for s in self.Environment.S | self.Environment.terminal_states:
             Q[s] = dict()
             for a in self.actions:
                 Q[s][a] = 15
@@ -231,7 +227,7 @@ class Predator():
         '''
         # Initialize Q            
         Q = dict()
-        for s in self.environment.S | self.environment.terminal_states:
+        for s in self.Environment.S | self.Environment.terminal_states:
             Q[s] = dict()            
             for a in self.actions:
                 Q[s][a] = 5
@@ -368,11 +364,11 @@ class Predator():
         # Udpate the state based on the predator's action
         s_new = self.performActionReduced(s, a)
         # Choose an action for the prey
-        s_prime = self.environment.prey.simulateAction( s_new, reduced=True )
+        s_prime = self.Environment.Prey.simulateAction( s_new, reduced=True )
         # Determine the reward for the state-action-next_state pair
-        r = self.environment.reward(s, a, s_prime)
+        r = self.Environment.reward(s, a, s_prime)
         # Check if the found state is terminal
-        terminal = s_prime in self.environment.terminal_states
+        terminal = s_prime in self.Environment.terminal_states
 
         return r, s_prime, terminal
         
@@ -381,7 +377,7 @@ class Predator():
          # Initialize parameters        
         
         # Initialize S and V
-        S,_ = self.environment.getStates()
+        S,_ = self.Environment.getStates()
         A = self.actions
 
         # Create dictionaries for Q and Returns
