@@ -18,7 +18,7 @@ class VisualizeData():
     '''    
     def __init__(self):
         self.Environment = EnvironmentReduced.EnvironmentReduced()
-        self.Predator = self.Environment.predator
+        self.Predator = self.Environment.Predator
         
     def plotPerformance(self, episodes=100):
         '''
@@ -35,15 +35,14 @@ class VisualizeData():
                       '{0} and alpha = {1}'.format(gamma, alpha)
 
                       
-                Q, return_list = self.predator.qLearning(alpha, 
+                Q, return_list = self.Predator.qLearning(alpha, 
                                                          gamma, 
                                                          epsilon, 
                                                          episodes)
                 i += 1
                 
-                return_array = np.array(self.smoothListLinear(return_list))
-                print return_array
-                print x                
+                return_array = np.array(self.smoothListTriangle(return_list))
+                
                 plt.plot(x, return_array, label='Alpha {0}'.format(alpha))
             plt.legend()   
             plt.show()

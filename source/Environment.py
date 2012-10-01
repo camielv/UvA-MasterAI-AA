@@ -21,8 +21,8 @@ class Environment:
         self.width  = width
         self.height = height
         self.S,self.terminal_states = self.getStates()
-        self.predator = Predator( self, predatorLocation )
-        self.prey = Prey( self, preyLocation )
+        self.Predator = Predator( self, predatorLocation )
+        self.Prey = Prey( self, preyLocation )
                 
     def getState( self ):
         '''Returns the current environment state.'''        
@@ -57,7 +57,7 @@ class Environment:
             V[s] = 0
           
         # Get the current policy 
-        policy = self.predator.policy
+        policy = self.Predator.policy
 
         # Define delta and theta
         delta = 0.2
@@ -74,7 +74,7 @@ class Environment:
             for s in self.S:
                 new_V[s] = 0               
                
-                for a in self.predator.actions:
+                for a in self.Predator.actions:
                     # Calculate all next states and their probabilities
                     P = self.nextStates( s, a )
                     for s_prime in P:
@@ -119,7 +119,7 @@ class Environment:
                 best_value = None
                 best_action = None
                 
-                for a in self.predator.actions:
+                for a in self.Predator.actions:
                     current_value = 0
                     
                     # Calculate all next states and their probabilities
@@ -134,7 +134,7 @@ class Environment:
                         best_action = a
                         
                 # In the new policy, that action is now the only one that is taken
-                self.predator.updatePolicy( s, best_action )
+                self.Predator.updatePolicy( s, best_action )
                 new_V[s] = best_value
                 
                 # Compute the error
@@ -175,13 +175,13 @@ class Environment:
         
         for s in self.S:
             # Retrieve action according to policy
-            policy_action = self.predator.getAction( s )
+            policy_action = self.Predator.getAction( s )
             
             best_action = None
             best_value = None
             
             # Check all possible actions
-            for a in self.predator.actions:                
+            for a in self.Predator.actions:                
                 current_value = 0
                 
                 # Calculate next states and their probabilities
@@ -195,7 +195,7 @@ class Environment:
                     best_action = a                    
 
             # Update the policy
-            self.predator.updatePolicy( s, best_action )
+            self.Predator.updatePolicy( s, best_action )
             
             # Check policy stability
             if best_action != policy_action:
@@ -209,6 +209,6 @@ class Environment:
         '''
         Reset the position of the prey and predator in this environment.        
         '''
-        self.prey.location = (5,5)
-        self.predator.location = (0,0)
+        self.Prey.location = (5,5)
+        self.Predator.location = (0,0)
         

@@ -19,8 +19,8 @@ class EnvironmentReduced( Environment ):
     '''
 
     def getState( self ):
-        predator = self.predator.location
-        prey = self.prey.location
+        predator = self.Predator.location
+        prey = self.Prey.location
         state_x = ( ( 5 + predator[0] - prey[0] ) % (self.width ) ) - 5
         state_y = ( ( 5 + predator[1] - prey[1] ) % (self.height ) ) - 5
         return state_x, state_y
@@ -60,8 +60,8 @@ class EnvironmentReduced( Environment ):
         Determine the next possible states given the current state s and 
         action a.         
         '''
-        new_state = self.predator.performActionReduced( s, a )
-        return self.prey.getPossibleStatesReduced( new_state )
+        new_state = self.Predator.performActionReduced( s, a )
+        return self.Prey.getPossibleStatesReduced( new_state )
         
         
     def run( self ):
@@ -72,7 +72,7 @@ class EnvironmentReduced( Environment ):
         s = self.getState()
         
         # Update predator positions given a state s
-        s_prime = self.predator.simulateAction( s, True )
+        s_prime = self.Predator.simulateAction( s, True )
             
         # Update prey position given the new state
-        self.prey.simulateAction( s_prime, True )
+        self.Prey.simulateAction( s_prime, True )
