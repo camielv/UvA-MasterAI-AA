@@ -11,6 +11,9 @@
 
 import random
 from itertools import izip
+import numpy as np
+import matplotlib.pyplot as plt
+import time
 
 argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]
 
@@ -229,21 +232,29 @@ class Predator():
         for s in self.environment.S | self.environment.terminal_states:
             Q[s] = dict()            
             for a in self.actions:
-                Q[s][a] = 15
+                Q[s][a] = 5
             
+        return_array = np.zeros(episodes)
+            
+        now = time.time()            
         # For a number of episodes
         for n in range(1,episodes+1):
-            if n % 1000 == 0:
-                print 'Episode {0}.'.format(n)            
             
+            if n % 10 == 0:
+                print 'Episode {0}, time taken: {1}.'.format(n, time.time()-now)
+                now = time.time()
+                
             # Initialize s
             s = (random.randint(-5,5), random.randint(-5,5))
 
             prey_caught = False
+            step_number = 0           
+            total_return = 0
             
             # Run through one episode
             while not prey_caught:      
-                
+                step_number += 1
+            
                 # Choose a from s using policy derived from Q (epsilon greedy)
                 a = self.deriveAction(Q, s, epsilon)
                 
@@ -261,8 +272,55 @@ class Predator():
                
                 # Update the state        
                 s = s_prime
+                
+                # In this case, only the last step contains reward > 0, but it
+                # is implemented for the general case anyway                
+                total_return += gamma**step_number * r
+
+            return_array[n-1] = self.simulate_X_times_using_Q(100, Q, epsilon)
+            total_return = 0
+        
+        # Plot performance
+        x = np.arange(0, episodes)
+        #f = interpolate.interp1d(x,return_array)
+        plt.plot( x, return_array )
+        plt.show()
+
         # Return the found Qvalues
         return Q
+        
+    def simulate_X_times_using_Q( self, X, Q, epsilon ):
+        '''
+        Simulate the environment containing prey and predator a number of X
+        times, using a state-action value function Q, for an epsilon greedy
+        policy derived from Q. Returns an average number of steps needed to 
+        catch the prey.        
+        '''
+        
+        # Keep track of the total number of steps
+        total_step_numbers = 0
+
+        for i in range(X):
+            step_number = 0
+            prey_caught = False
+            # Initialize s
+            s = (random.randint(-5,5), random.randint(-5,5))
+ 
+            while not prey_caught:      
+                
+                step_number += 1
+                
+                # Choose a from s using policy derived from Q (epsilon greedy)
+                a = self.deriveAction(Q, s, epsilon)
+                
+                # Take action a, observe r, s_prime
+                r, s_prime, prey_caught = self.takeAction(s, a)                
+                
+                s = s_prime                
+                
+            total_step_numbers += step_number
+            
+        return total_step_numbers / float(X)
      
     def deriveAction(self, Q, s, epsilon):
         # Find the action that maximizes Q[(s, a)]

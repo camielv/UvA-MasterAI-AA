@@ -66,7 +66,7 @@ class EnvironmentReduced( Environment ):
         
     def run( self ):
         '''
-        Performs one step of the simulation.
+        Performs one ste\p of the simulation.
         '''
         # Retrieve the state
         s = self.getState()
