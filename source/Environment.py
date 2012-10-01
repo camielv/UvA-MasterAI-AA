@@ -1,4 +1,4 @@
-# Assignment:   Single Agent Planning
+# Assignment:   Single Agent Learning
 # Course:       Autonomous Agents 2012-2013
 # Education:    Master Artificial Intelligence
 # By:           Steven Laan

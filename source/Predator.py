@@ -13,6 +13,8 @@ import random
 from itertools import izip
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+from scipy import interpolate
 import time
 
 argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]
@@ -234,7 +236,7 @@ class Predator():
             for a in self.actions:
                 Q[s][a] = 5
             
-        return_array = np.zeros(episodes)
+        return_list = list()
             
         now = time.time()            
         # For a number of episodes
@@ -277,18 +279,12 @@ class Predator():
                 # is implemented for the general case anyway                
                 total_return += gamma**step_number * r
 
-            return_array[n-1] = self.simulate_X_times_using_Q(100, Q, epsilon)
+            return_list.append(self.simulate_X_times_using_Q(100, Q, epsilon))
             total_return = 0
-        
-        # Plot performance
-        x = np.arange(0, episodes)
-        #f = interpolate.interp1d(x,return_array)
-        plt.plot( x, return_array )
-        plt.show()
 
-        # Return the found Qvalues
-        return Q
-        
+        # Return the found Qvalues and simulation data
+        return Q, return_list
+            
     def simulate_X_times_using_Q( self, X, Q, epsilon ):
         '''
         Simulate the environment containing prey and predator a number of X
@@ -380,10 +376,9 @@ class Predator():
 
         return r, s_prime, terminal
         
-    def onPolicyMonteCarloControl( self ):
+    def onPolicyMonteCarloControl( self, epsilon=0.1 ):
         
          # Initialize parameters        
-        epsilon = 0.1        
         
         # Initialize S and V
         S,_ = self.environment.getStates()
@@ -400,7 +395,7 @@ class Predator():
                 Returns[(s,a)] = []
                 self.policy[(s,a)] = 1.0 / len( A )
                 
-        s_start = (5,5)
+        s_start = (random.randint(-5,5),random.randint(-5,5))
         max_iter = 100        
         i = 0
         forever = True
