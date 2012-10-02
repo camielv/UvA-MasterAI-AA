@@ -11,6 +11,7 @@
 import EnvironmentReduced
 import numpy as np
 import matplotlib.pyplot as plt
+import csv
 
 class VisualizeData():
     '''
@@ -20,17 +21,18 @@ class VisualizeData():
         self.Environment = EnvironmentReduced.EnvironmentReduced()
         self.Predator = self.Environment.Predator
         
-    def plotPerformance(self, episodes=100):
+    def plotPerformance(self, episodes=500, save_data=True):
         '''
         Executes a given function for different discount alpha, gamma, epsilon
         '''
-        some_range = np.arange(0.1, 0.91, 0.2)
+        some_range = np.arange(0.1, 0.31, 0.2)
         x = np.arange(0, episodes)
         epsilon = 0.1
         
+        
         for gamma in some_range:
             i = 0
-            for alpha in [0.9]:
+            for alpha in some_range:
                 print '\nPerformance measure of Qlearning for gamma = ' + \
                       '{0} and alpha = {1}'.format(gamma, alpha)
 
@@ -41,11 +43,29 @@ class VisualizeData():
                                                          episodes)
                 i += 1
                 
-                return_array = np.array(self.smoothListTriangle(return_list))
-                
-                plt.plot(x, return_array, label='Alpha {0}'.format(alpha))
-            plt.legend()   
-            plt.show()
+                return_list = self.smoothListTriangle(return_list, degree=10)
+                                        
+                if save_data:
+                    print return_list
+                    for i in xrange(len(return_list)):
+                        return_list[i] = str(return_list[i])
+                    with open('performance.csv', 'wb') as f:
+                        writer = csv.writer(f)
+                        writer.writerow(return_list)
+                        
+                else:
+                    plt.plot(x, np.array(return_list), label='Alpha {0}'.format(alpha))
+            if not save_data:
+                plt.legend()  
+                plt.xlabel('Number of episodes')
+                plt.ylabel('Number of steps taken')
+                plt.title('The agent\'s performance (smoothed), gamma = {0}.'.format(gamma))
+                plt.show()
+            else:
+                with open('performance.csv', 'wb') as f:
+                    writer = csv.writer(f)
+                    writer.writerow([])
+        
             
     def smoothListLinear(self, input_list, degree=5):
         '''
