@@ -25,7 +25,7 @@ class VisualizeData():
         '''
         Executes a given function for different discount alpha, gamma, epsilon
         '''
-        some_range = np.arange(0.1, 0.31, 0.2)
+        some_range = np.arange(0.9, 0.91, 0.2)
         x = np.arange(0, episodes)
         epsilon = 0.1
         
@@ -46,13 +46,9 @@ class VisualizeData():
                 return_list = self.smoothListTriangle(return_list, degree=10)
                                         
                 if save_data:
-                    print return_list
-                    for i in xrange(len(return_list)):
-                        return_list[i] = str(return_list[i])
-                    with open('performance.csv', 'wb') as f:
+                    with open('performance.csv', 'w') as f:
                         writer = csv.writer(f)
-                        writer.writerow(return_list)
-                        
+                        writer.writerow(return_list)        
                 else:
                     plt.plot(x, np.array(return_list), label='Alpha {0}'.format(alpha))
             if not save_data:
@@ -62,7 +58,7 @@ class VisualizeData():
                 plt.title('The agent\'s performance (smoothed), gamma = {0}.'.format(gamma))
                 plt.show()
             else:
-                with open('performance.csv', 'wb') as f:
+                with open('performance.csv', 'w') as f:
                     writer = csv.writer(f)
                     writer.writerow([])
         

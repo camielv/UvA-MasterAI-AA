@@ -230,15 +230,18 @@ class Predator():
         for s in self.Environment.S | self.Environment.terminal_states:
             Q[s] = dict()            
             for a in self.actions:
-                Q[s][a] = 5
-            
+                Q[s][a] = 15
+        # Value of absorbing state starts at 0 
+        for a in self.actions:
+            Q[(0,0)][a] = 0        
+        
         return_list = list()
             
         now = time.time()            
         # For a number of episodes
         for n in range(1,episodes+1):
             
-            if n % 10 == 0:
+            if n % 100 == 0:
                 print 'Episode {0}, time taken: {1}.'.format(n, time.time()-now)
                 now = time.time()
                 
@@ -247,7 +250,6 @@ class Predator():
 
             prey_caught = False
             step_number = 0           
-            total_return = 0
             
             # Run through one episode
             while not prey_caught:      
@@ -273,50 +275,54 @@ class Predator():
                 
                 # In this case, only the last step contains reward > 0, but it
                 # is implemented for the general case anyway                
-                total_return += gamma**step_number * r
-
-            return_list.append(self.simulate_X_times_using_Q(100, Q, epsilon))
-            total_return = 0
+                #total_return += gamma**step_number * r
+                
+                # Finds both the average number of steps and return for X
+                # simulations using a given Q.
+                #average_steps = self.simulate_X_times_using_Q(10, Q, epsilon)
+            
+            #return_list.append(average_steps) 
 
         # Return the found Qvalues and simulation data
-        return Q, return_list
+        return Q #, return_list
             
-    def simulate_X_times_using_Q( self, X, Q, epsilon ):
+    def simulate_X_times_using_Q( self, X, Q, epsilon):
         '''
         Simulate the environment containing prey and predator a number of X
         times, using a state-action value function Q, for an epsilon greedy
         policy derived from Q. Returns an average number of steps needed to 
         catch the prey.        
         '''
-        
         # Keep track of the total number of steps
         total_step_numbers = 0
-
+        
         for i in range(X):
+            # Initialize variables which will keep track of the current run i
             step_number = 0
             prey_caught = False
+            
             # Initialize s
             s = (random.randint(-5,5), random.randint(-5,5))
  
             while not prey_caught:      
-                
                 step_number += 1
-                
                 # Choose a from s using policy derived from Q (epsilon greedy)
                 a = self.deriveAction(Q, s, epsilon)
                 
                 # Take action a, observe r, s_prime
                 r, s_prime, prey_caught = self.takeAction(s, a)                
                 
-                s = s_prime                
-                
+                s = s_prime   
+                                
             total_step_numbers += step_number
             
-        return total_step_numbers / float(X)
+        average_number_of_steps = (total_step_numbers / float(X))
+        
+        return average_number_of_steps
      
     def deriveAction(self, Q, s, epsilon):
         # Find the action that maximizes Q[(s, a)]
-        max_Q = 0
+        max_Q = -1
         best_a = None
         prob_actions = dict()        
         uniform_epsilon = epsilon / (len(self.actions))
@@ -326,10 +332,10 @@ class Predator():
                 max_Q = Q[s][possible_a]
                 best_a = possible_a
             # Set probabilities of all actions uniformly
-            prob_actions[(s,possible_a)] = uniform_epsilon
+            prob_actions[(s, possible_a)] = uniform_epsilon
         
         # Give the best action for this state a probability of 1
-        prob_actions[(s,best_a)] += 1 - epsilon
+        prob_actions[(s, best_a)] += 1 - epsilon
                     
         # For every action, check if the cumulative probability exceeds a 
         # random number. 
