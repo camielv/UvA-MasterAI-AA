@@ -142,33 +142,29 @@ class Predator():
         # Give the new action for this state a probability of 1
         self.policy[(s,best_a)] = 1.0
        
-    def Sarsa( self ):
+    def sarsa(self, alpha=0.1, gamma=0.1, epsilon=0.1, episodes=1000):
         '''
-        This function implements Sarsa
+        Implementation of Sarsa given the learning rate alpha, discount
+        factor gamma, epislon for epsilon-greedy policy, and the number of
+        episodes.
         '''
-        # Learning rate
-        alpha = 0.3
-        # Discount factor
-        gamma = 1.0
-        # Epislon used for epsilon-greedy policy generation
-        epsilon = 0.1
-        # Amount of episodes for learning
-        episodes = 1000
-
         # Initialize Q
         Q = dict()
-
         for s in self.Environment.S | self.Environment.terminal_states:
             Q[s] = dict()
             for a in self.actions:
                 Q[s][a] = 15
 
+        # Value of absorbing state starts at 0 
+        for a in self.actions:
+            Q[(0,0)][a] = 0        
+
         for n in range( episodes ):
-            if n%1000 == 0:
+            if n%100 == 0:
                 print "Episodes: ", n
 
             # Current state
-            s = ( random.randint(-5,5), random.randint(-5,5) )
+            s = (random.randint(-5,5), random.randint(-5,5))
             prey_caught = False
 
             # Determine which action maximizes Q(s,a)
@@ -191,17 +187,17 @@ class Predator():
 
     def deriveActionSarsa(self, Q, s, epsilon):
         # Find the action that maximizes Q[(s, a)]
-        max_Q = 0
+        max_Q = -1
         best_a = None
         prob_actions = dict()        
-        uniform_epsilon = epsilon / (len(self.actions)-1)
+        uniform_epsilon = epsilon / len(self.actions)
         
         for possible_a in self.actions:
-            # Set probabilities of all actions uniformly
-            prob_actions[(s,possible_a)] = uniform_epsilon
             if Q[s][possible_a] > max_Q:
                 max_Q = Q[s][possible_a]
                 best_a = possible_a
+            # Set probabilities of all actions uniformly
+            prob_actions[(s,possible_a)] = uniform_epsilon
         
         # Update policy of predator
         self.updatePolicyEpsilonGreedy( s, best_a, epsilon )
