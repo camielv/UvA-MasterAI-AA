@@ -12,6 +12,7 @@
 import random
 from itertools import izip
 import time
+from math import exp
 
 argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]
 
@@ -219,12 +220,23 @@ class Predator():
             if cumulative_prob >= random_number:                
                 return a
 
-    def qLearning(self, alpha=0.1, gamma=0.1, epsilon=0.1, episodes=1000):
+    def qLearning(self, episodes=1000, alpha=0.1, gamma=0.1, epsilon=0, tau=0):
         '''
+        qLearning(episodes, alpha, gamma, epsilon, tau) -> Q, return_list
+        
         Implementation of Q-learning given the learning rate alpha, discount
         factor gamma, epsilon for epsilon-greedy policy, and the number of 
-        episodes.
+        episodes. Returns the values of Q as a 2-deep dict (Q[s][a]) and a list
+        containing performance measures of the agent (number of steps)
         '''
+
+        if epsilon > 0:
+            print 'Using epsilon-greedy action selection.'
+        elif tau > 0:
+            print 'Using softmax action selection.'
+        else:
+            print "Fill in argument epsilon=.. or tau=.."
+
         # Initialize Q            
         Q = dict()
         for s in self.Environment.S | self.Environment.terminal_states:
@@ -241,7 +253,7 @@ class Predator():
         # For a number of episodes
         for n in range(1,episodes+1):
             
-            if n % 100 == 0:
+            if n % 10 == 0:
                 print 'Episode {0}, time taken: {1}.'.format(n, time.time()-now)
                 now = time.time()
                 
@@ -254,9 +266,13 @@ class Predator():
             # Run through one episode
             while not prey_caught:      
                 step_number += 1
-            
-                # Choose a from s using policy derived from Q (epsilon greedy)
-                a = self.deriveAction(Q, s, epsilon)
+               
+                # If epsilon-greedy action selection is used
+                if epsilon > 0:
+                    # Choose a from s using policy derived from Q (epsilon greedy)
+                    a = self.deriveAction(Q, s, epsilon)
+                elif tau > 0:
+                    a = self.deriveActionSoftmax(Q, s, tau)
                 
                 # Take action a, observe r, s_prime
                 r, s_prime, prey_caught = self.takeAction(s, a)                
@@ -277,14 +293,14 @@ class Predator():
                 # is implemented for the general case anyway                
                 #total_return += gamma**step_number * r
                 
-                # Finds both the average number of steps and return for X
-                # simulations using a given Q.
-                #average_steps = self.simulate_X_times_using_Q(10, Q, epsilon)
-            
+            # Finds both the average number of steps and return for X
+            # simulations using a given Q.
+            #average_steps = self.simulate_X_times_using_Q(100, Q, epsilon)
+        
             #return_list.append(average_steps) 
 
         # Return the found Qvalues and simulation data
-        return Q #, return_list
+        return Q, return_list
             
     def simulate_X_times_using_Q( self, X, Q, epsilon):
         '''
@@ -321,7 +337,12 @@ class Predator():
         return average_number_of_steps
      
     def deriveAction(self, Q, s, epsilon):
-        # Find the action that maximizes Q[(s, a)]
+        '''
+        Find an action using Q, the current state, and epsilon, in an 
+        epsilon-greedy fashion. 
+        '''
+        
+        # Find the action that maximizes Q[(s, a)]                
         max_Q = -1
         best_a = None
         prob_actions = dict()        
@@ -332,10 +353,10 @@ class Predator():
                 max_Q = Q[s][possible_a]
                 best_a = possible_a
             # Set probabilities of all actions uniformly
-            prob_actions[(s, possible_a)] = uniform_epsilon
+            prob_actions[possible_a] = uniform_epsilon
         
         # Give the best action for this state a probability of 1
-        prob_actions[(s, best_a)] += 1 - epsilon
+        prob_actions[best_a] += 1 - epsilon
                     
         # For every action, check if the cumulative probability exceeds a 
         # random number. 
@@ -343,7 +364,33 @@ class Predator():
         cumulative_prob = 0.0
         
         for a in self.actions:
-            cumulative_prob += prob_actions[(s,a)]
+            cumulative_prob += prob_actions[a]
+            if cumulative_prob >= random_number:                
+                return a
+    
+    def deriveActionSoftmax(self, Q, s, tau):
+        '''
+        Find an action using Q, the current state s, and the temperature, 
+        a measure similar to epsilon.
+        '''        
+        prob_actions = dict()
+        
+        # Determine the probability of each action
+        denominator = 0
+        for b in self.actions:
+            denominator += exp(Q[s][b] / float(tau))
+
+        for a in self.actions:
+            numerator = exp(Q[s][a] / float(tau))
+            prob_actions[a] = numerator / denominator
+            
+        # For every action, check if the cumulative probability exceeds a 
+        # random number. 
+        random_number = random.random()
+        cumulative_prob = 0.0
+        
+        for a in self.actions:
+            cumulative_prob += prob_actions[a]
             if cumulative_prob >= random_number:                
                 return a
 
@@ -351,10 +398,11 @@ class Predator():
         '''
         Given a state and the best action, this function sets the predators 
         policy so that in state s, the probability of taking action best_a is
-        1.0 and probabilities of taking any other actions are (of course) 0. 
+        1.0 - epsilon + epsilon / N and probabilities of taking any other 
+        actions are epsilon/N. 
         '''
         
-        uniform_epsilon = epsilon / (len(self.actions)-1)
+        uniform_epsilon = epsilon / (len(self.actions))
 
         # Set probabilities of all actions except the best action uniformly
         for a in self.actions:

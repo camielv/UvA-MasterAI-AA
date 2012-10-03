@@ -21,14 +21,13 @@ class VisualizeData():
         self.Environment = EnvironmentReduced.EnvironmentReduced()
         self.Predator = self.Environment.Predator
         
-    def plotPerformance(self, episodes=500, save_data=True):
+    def plotPerformance(self, episodes=500):
         '''
         Executes a given function for different discount alpha, gamma, epsilon
         '''
-        some_range = np.arange(0.9, 0.91, 0.2)
+        some_range = np.arange(0.1, 0.91, 0.2)
         x = np.arange(0, episodes)
         epsilon = 0.1
-        
         
         for gamma in some_range:
             i = 0
@@ -45,23 +44,13 @@ class VisualizeData():
                 
                 return_list = self.smoothListTriangle(return_list, degree=10)
                                         
-                if save_data:
-                    with open('performance.csv', 'w') as f:
-                        writer = csv.writer(f)
-                        writer.writerow(return_list)        
-                else:
-                    plt.plot(x, np.array(return_list), label='Alpha {0}'.format(alpha))
-            if not save_data:
-                plt.legend()  
-                plt.xlabel('Number of episodes')
-                plt.ylabel('Number of steps taken')
-                plt.title('The agent\'s performance (smoothed), gamma = {0}.'.format(gamma))
-                plt.show()
-            else:
-                with open('performance.csv', 'w') as f:
-                    writer = csv.writer(f)
-                    writer.writerow([])
-        
+                plt.plot(x, np.array(return_list), label='Alpha {0}'.format(alpha))
+            
+            plt.legend()  
+            plt.xlabel('Number of episodes')
+            plt.ylabel('Number of steps taken')
+            plt.title('The agent\'s performance (smoothed), gamma = {0}.'.format(gamma))
+            plt.show()
             
     def smoothListLinear(self, input_list, degree=5):
         '''
