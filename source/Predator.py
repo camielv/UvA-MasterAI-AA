@@ -465,6 +465,7 @@ class Predator():
                                    episodes=250,
                                    epsilon=0.1, 
                                    gamma=0.8, 
+                                   alpha = 0,
                                    optimistic_init=15 ):
         '''
         Q, return_list <- onPolicyMonteCarloControl(epsilon,
@@ -499,7 +500,7 @@ class Predator():
         while forever:
             n += 1
             # Stop if a max number of iterations is reached
-            forever = n < max_iter
+            forever = n < episodes
             
             if n % 50 == 0:
                 print 'Episode {0}, time taken: {1}.'.format(n, time.time()-now)
