@@ -33,13 +33,14 @@ class VisualizeData():
         
         for g in [0.1, 0.3, 0.5, 0.7, 0.9]:
             for a in [0.1, 0.2, 0.3, 0.4, 0.5]:
-                print '\nPerformance measure of Qlearning for gamma = ' + \
+                print '\nPerformance measure of', method, 'for gamma = ' + \
                       '{0} and alpha = {1}'.format(g, a)
 
                 Q, return_list = method(episodes=episodes,
                                         alpha=a, 
                                         gamma=g, 
-                                        epsilon=0.1)
+                                        epsilon=0.1,
+                                        simulate=True)
                 
                 return_list = self.smoothListTriangle(return_list, degree=10)
                                         
@@ -50,6 +51,36 @@ class VisualizeData():
             plt.ylabel('Number of steps taken')
             plt.title('The agent\'s performance (smoothed), gamma = {0}.'.format(g))
             plt.show()
+
+    def plotPerformanceMonteCarlo(self, episodes=250):
+        '''
+        Executes qlearning for different discount and learning rates, and plots
+        the results. Possible methods are:
+            self.Predator.onPolicyMonteCarloControl
+            self.Predator.sarsa
+            self.Predator.qLearning
+        '''
+        
+        x = np.arange(0, episodes)
+        
+        for g in [0.1, 0.3, 0.5, 0.7, 0.9]:
+            print '\nPerformance measure of Monte Carlo for gamma = {0}'.format(g)
+
+            Q, return_list = self.Predator.onPolicyMonteCarloControl(
+                                    episodes=episodes,
+                                    gamma=g, 
+                                    epsilon=0.1)
+            
+            return_list = self.smoothListTriangle(return_list, degree=10)
+                                    
+            plt.plot(x, np.array(return_list), label='Discount {0}'.format(g))
+            
+        plt.legend()  
+        plt.xlabel('Number of episodes')
+        plt.ylabel('Number of steps taken')
+        plt.title('The agent\'s performance (smoothed)')
+        plt.show()
+
         
     def plotSoftmaxPerformance(self, episodes=250):        
         '''

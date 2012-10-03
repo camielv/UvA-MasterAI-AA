@@ -148,16 +148,28 @@ class Predator():
                alpha=0.1, 
                gamma=0.1, 
                epsilon=0.1,
-               optimistic_init=15 ):
+               optimistic_init=15,
+               simulate=False ):
         '''
+        Q, return_list <- sarsa( episodes,
+                                alpha,
+                                gamma,
+                                epsilon,
+                                optimistic_init,
+                                simulate)
+
         Implementation of Sarsa given the learning rate alpha, discount
         factor gamma, epislon for epsilon-greedy policy, and the number of
         episodes.
+        
+
+        Simulate is a boolean used to visualize the performance of the agent.
         '''
         # Initialize Q
         Q = self.init_Q(optimistic_init)
-
-        return_list = list()
+        if simulate:
+            return_list = list()
+        
         now = time.time()
         
         for n in xrange(1, episodes + 1):
@@ -187,15 +199,17 @@ class Predator():
                 a = a_prime
             # Finds both the average number of steps and return for X
             # simulations using a given Q.
-            average_steps = self.simulate_X_times_using_Q(100, 
+            if simulate:
+                average_steps = self.simulate_X_times_using_Q(100, 
                                                           Q, 
                                                           epsilon, 
                                                           epsilongreedy=True)
         
-            return_list.append(average_steps) 
-
-        return Q, return_list
-
+                return_list.append(average_steps) 
+        if simulate:
+            return Q, return_list
+        return Q
+        
     def deriveActionSarsa( self, Q, s, epsilon ):
         '''
         Find the action that maximizes Q[(s, a)]
@@ -250,20 +264,24 @@ class Predator():
                    gamma=0.1, 
                    epsilon_or_tau=0.1, 
                    epsilongreedy=True,
-                   optimistic_value=15 ):
+                   optimistic_value=15,
+                   simulate=False ):
         '''
         Q, return_list <- qLearning(episodes, 
                                     alpha, 
                                     gamma, 
                                     epsilon_or_tau, 
                                     epsilongreedy,
-                                    optimistic_value)
+                                    optimistic_value,
+                                    simulate)
         
         Implementation of Q-learning given the learning rate alpha, discount
         factor gamma, epsilon for epsilon-greedy policy or temperature tau for
         softmax action selection. Boolean epsilongreedy determines whether 
         softmax or epsilon-greedy is used. Integer optimistic_value is used 
         to initialize Q, and should be larger than zero.
+        
+        simulate is a boolean used to visualize the performance of the agent.
         
         Returns the values of Q as a 2-deep dict (Q[s][a]) and a list
         containing performance measures of the agent (number of steps).
@@ -280,7 +298,8 @@ class Predator():
         # Initialize Q            
         Q = self.init_Q( optimistic_value )    
         
-        return_list = list()
+        if simulate:
+            return_list = list()
             
         now = time.time()            
         
@@ -320,15 +339,18 @@ class Predator():
                 
             # Finds both the average number of steps and return for X
             # simulations using a given Q.
-            average_steps = self.simulate_X_times_using_Q(100, 
+            if simulate:
+                average_steps = self.simulate_X_times_using_Q(100, 
                                                           Q, 
                                                           epsilon_or_tau, 
                                                           epsilongreedy)
         
-            return_list.append(average_steps) 
+                return_list.append(average_steps) 
 
-        # Return the found Qvalues and simulation data
-        return Q, return_list
+        # Return the found Qvalues (and possibly simulation data)
+        if simulate:
+            return Q, return_list    
+        return Q
             
     def simulate_X_times_using_Q( self, X, Q, epsilon_or_tau, epsilongreedy):
         '''
@@ -409,11 +431,7 @@ class Predator():
         # Determine the probability of each action
         denominator = 0
         for b in self.actions:
-            try:
-                denominator += exp(Q[s][b] / float(tau))
-            except:
-                print tau
-                print Q[s][b]
+            denominator += exp(Q[s][b] / float(tau))
                 
         for a in self.actions:
             numerator = exp(Q[s][a] / float(tau))
@@ -465,13 +483,17 @@ class Predator():
                                    episodes=250,
                                    epsilon=0.1, 
                                    gamma=0.8, 
-                                   alpha = 0,
-                                   optimistic_init=15 ):
+                                   optimistic_init=15, 
+                                   simulate=False
+                                   ):
         '''
         Q, return_list <- onPolicyMonteCarloControl(epsilon,
                                                     gamma,
                                                     max_iter,
-                                                    optimistic_init)        
+                                                    optimistic_init,
+                                                    simulate)        
+        
+        Simulate is a boolean used to visualize the performance of the agent.        
         
         Performs Monte Carlo estimation of state action values, using an 
         epsilon-greedy policy, discount factor gamma, maximum number of 
@@ -493,7 +515,9 @@ class Predator():
                 
         n = 0
         forever = True
-        return_list = list()
+       
+        if simulate:
+            return_list = list()
 
         now = time.time()
         
@@ -508,7 +532,10 @@ class Predator():
             
             prey_caught = False
             episode = list()
-            s = (random.randint(-5,5),random.randint(-5,5))
+
+            # Initialize s randomly in a nonterminal state
+            s = random.sample(S, 1)[0]
+            
             R = 0.0
             step = 0
             
@@ -540,11 +567,14 @@ class Predator():
                 
             # Finds both the average number of steps and return for X
             # simulations using a given Q.
-            average_steps = self.simulate_X_times_using_Q(100, 
+            if simulate:
+                average_steps = self.simulate_X_times_using_Q(100, 
                                                           Q, 
                                                           epsilon, 
                                                           epsilongreedy=True)
         
-            return_list.append(average_steps) 
+                return_list.append(average_steps) 
 
-        return Q, return_list
+        if simulate:
+            return Q, return_list
+        return Q
