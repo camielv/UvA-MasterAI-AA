@@ -11,7 +11,6 @@
 import EnvironmentReduced
 import numpy as np
 import matplotlib.pyplot as plt
-import csv
 
 class VisualizeData():
     '''
@@ -21,25 +20,25 @@ class VisualizeData():
         self.Environment = EnvironmentReduced.EnvironmentReduced()
         self.Predator = self.Environment.Predator
         
-    def plotPerformance(self, episodes=500):
+    def plotPerformance(self, episodes=250):
         '''
-        Executes a given function for different discount alpha, gamma, epsilon
+        Executes qlearning for different discount and learning rates, and plots
+        the results.
         '''
-        some_range = np.arange(0.1, 0.91, 0.2)
         x = np.arange(0, episodes)
         epsilon = 0.1
         
-        for gamma in some_range:
+        for gamma in [0.1, 0.3, 0.5, 0.7, 0.9]:
             i = 0
-            for alpha in some_range:
+            for alpha in [0.1, 0.2, 0.3, 0.4, 0.5]:
                 print '\nPerformance measure of Qlearning for gamma = ' + \
                       '{0} and alpha = {1}'.format(gamma, alpha)
 
                       
-                Q, return_list = self.Predator.qLearning(alpha, 
+                Q, return_list = self.Predator.qLearning(episodes,
+                                                         alpha, 
                                                          gamma, 
-                                                         epsilon, 
-                                                         episodes)
+                                                         epsilon)
                 i += 1
                 
                 return_list = self.smoothListTriangle(return_list, degree=10)
@@ -52,11 +51,60 @@ class VisualizeData():
             plt.title('The agent\'s performance (smoothed), gamma = {0}.'.format(gamma))
             plt.show()
             
+    def plotSoftmaxPerformance(self, episodes=250):        
+        '''
+        Executes Q-learning for different temperatures, and plots the results.                
+        '''
+        x = np.arange(0, episodes)
+
+        for t in [1, 0.5, 0.1, 0.01]:
+            Q, return_list = self.Predator.qLearning(episodes,
+                                                     alpha=0.1,
+                                                     gamma=0.7,
+                                                     epsilon_or_tau=t,
+                                                     epsilongreedy=False)
+            return_list = self.smoothListTriangle(return_list, degree=10)
+            
+            plt.plot(x, np.array(return_list), label='Tau {0}'.format(t))
+            
+        plt.legend()  
+        plt.xlabel('Number of episodes')
+        plt.ylabel('Number of steps taken')
+        plt.title('The agent\'s performance (using\nsoftmax action selection).')
+        plt.show()
+            
+    def plotOptimisticInits(self, episodes=250):
+        '''
+        Executes Q-learning for different optimistic initializations of Q, and 
+        plots the results.                
+        '''
+        x = np.arange(0, episodes)
+
+        for c in [5, 15, 25]:
+            Q, return_list = self.Predator.qLearning(episodes,
+                                                     alpha=0.1,
+                                                     gamma=0.7,
+                                                     epsilon_or_tau=0.1,
+                                                     epsilongreedy=True,
+                                                     optimistic_value=c)
+                                                     
+            return_list = self.smoothListTriangle(return_list, degree=10)
+            
+            plt.plot(x, np.array(return_list), label='Initial value {0}'.format(c))
+            
+        plt.legend()  
+        plt.xlabel('Number of episodes')
+        plt.ylabel('Number of steps taken')
+        plt.title('The agent\'s performance for different\ninitializations of Q')
+        plt.show()
+        
+    
     def smoothListLinear(self, input_list, degree=5):
         '''
         Smooths a given list input_list based on a degree, e.g. when input_list
         is [1,2,3,4] and degree = 1, the output will be a list containing the 
-        mean of a subsection of 1 element plus 1 preceding plus 1 next element.        
+        mean of a subsection of 1 element plus 1 preceding plus 1 subsequent
+        element.        
         '''        
         
         output_list = list()
@@ -73,10 +121,10 @@ class VisualizeData():
             
     def smoothListTriangle(self, input_list, degree=5):  
         '''
-        Smooths a given list input_list based on a triangle, e.g. when
-        input_list is [1,2,3,4] and degree = 1, the output will be a list 
-        containing the weighted mean of a subsection of 1 element plus 1 
-        preceding plus 1 next element, where center elements have more weight.
+        Smooths a given list input_list based on a triangle form, e.g. when
+        the degree = 1, the output will be a list containing the weighted mean 
+        of a subsection of 1 element plus 1 preceding plus 1 subsequent 
+        element, where center elements have more weight.
         '''        
         weights = list()
         smoothed = list()

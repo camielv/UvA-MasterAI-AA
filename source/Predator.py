@@ -130,7 +130,7 @@ class Predator():
 
         return (new_x, new_y)
 
-    def updatePolicy(self, s, best_a):
+    def updatePolicy( self, s, best_a ):
         '''
         Given a state and the best action, this function sets the predators 
         policy so that in state s, the probability of taking action best_a is
@@ -143,24 +143,16 @@ class Predator():
         # Give the new action for this state a probability of 1
         self.policy[(s,best_a)] = 1.0
        
-    def sarsa(self, alpha=0.1, gamma=0.1, epsilon=0.1, episodes=1000):
+    def sarsa( self, episodes=1000, alpha=0.1, gamma=0.1, epsilon=0.1 ):
         '''
         Implementation of Sarsa given the learning rate alpha, discount
         factor gamma, epislon for epsilon-greedy policy, and the number of
         episodes.
         '''
         # Initialize Q
-        Q = dict()
-        for s in self.Environment.S | self.Environment.terminal_states:
-            Q[s] = dict()
-            for a in self.actions:
-                Q[s][a] = 15
+        Q = self.init_Q
 
-        # Value of absorbing state starts at 0 
-        for a in self.actions:
-            Q[(0,0)][a] = 0        
-
-        for n in range( episodes ):
+        for n in xrange( episodes ):
             if n%100 == 0:
                 print "Episodes: ", n
 
@@ -186,25 +178,24 @@ class Predator():
                 a = a_prime
         return Q
 
-    def deriveActionSarsa(self, Q, s, epsilon):
-        # Find the action that maximizes Q[(s, a)]
-        max_Q = -1
-        best_a = None
+    def deriveActionSarsa( self, Q, s, epsilon ):
+        '''
+        Find the action that maximizes Q[(s, a)]
+        '''
         prob_actions = dict()        
         uniform_epsilon = epsilon / len(self.actions)
         
         for possible_a in self.actions:
-            if Q[s][possible_a] > max_Q:
-                max_Q = Q[s][possible_a]
-                best_a = possible_a
             # Set probabilities of all actions uniformly
-            prob_actions[(s,possible_a)] = uniform_epsilon
+            prob_actions[possible_a] = uniform_epsilon
+        
+        best_a = argmax( Q[s] )
         
         # Update policy of predator
         self.updatePolicyEpsilonGreedy( s, best_a, epsilon )
 
         # Give the best action for this state a probability of 1
-        prob_actions[(s,best_a)] += 1 - epsilon
+        prob_actions[best_a] += 1 - epsilon
 
         # For every action, check if the cumulative probability exceeds a 
         # random number. 
@@ -216,40 +207,69 @@ class Predator():
             if cumulative_prob >= random_number:                
                 return a
 
-    def qLearning(self, episodes=1000, alpha=0.1, gamma=0.1, epsilon=0, tau=0):
+    def init_Q(self, optimistic_value=15):    
         '''
-        qLearning(episodes, alpha, gamma, epsilon, tau) -> Q, return_list
-        
-        Implementation of Q-learning given the learning rate alpha, discount
-        factor gamma, epsilon for epsilon-greedy policy, and the number of 
-        episodes. Returns the values of Q as a 2-deep dict (Q[s][a]) and a list
-        containing performance measures of the agent (number of steps)
+        Fill all values of Q based on a given optimistic value.
         '''
-
-        if epsilon > 0:
-            print 'Using epsilon-greedy action selection.'
-        elif tau > 0:
-            print 'Using softmax action selection.'
-        else:
-            print "Fill in argument epsilon=.. or tau=.."
-
-        # Initialize Q            
         Q = dict()
-        for s in self.Environment.S | self.Environment.terminal_states:
+        # Value of any nonterminal state is the optimistic value
+        for s in self.Environment.S:
             Q[s] = dict()            
             for a in self.actions:
-                Q[s][a] = 15
-        # Value of absorbing state starts at 0 
-        for a in self.actions:
-            Q[(0,0)][a] = 0        
+                Q[s][a] = optimistic_value
+
+        # Value of absorbing state(s) is 0
+        for s in self.Environment.terminal_states:
+            Q[s] = dict()            
+            for a in self.actions:
+                Q[s][a] = 0        
+
+        return Q
+
+    def qLearning( self, 
+                   episodes=1000, 
+                   alpha=0.1, 
+                   gamma=0.1, 
+                   epsilon_or_tau=0.1, 
+                   epsilongreedy=True,
+                   optimistic_value=15 ):
+        '''
+        Q, return_list <- qLearning(episodes, 
+                                    alpha, 
+                                    gamma, 
+                                    epsilon_or_tau, 
+                                    epsilongreedy,
+                                    optimistic_value)
+        
+        Implementation of Q-learning given the learning rate alpha, discount
+        factor gamma, epsilon for epsilon-greedy policy or temperature tau for
+        softmax action selection. Boolean epsilongreedy determines whether 
+        softmax or epsilon-greedy is used. Integer optimistic_value is used 
+        to initialize Q, and should be larger than zero.
+        
+        Returns the values of Q as a 2-deep dict (Q[s][a]) and a list
+        containing performance measures of the agent (number of steps).
+        '''
+
+        # Use either softmax or epsilon greedy action selection
+        if epsilongreedy:
+            print 'Using epsilon-greedy action selection.'
+            findAction = self.deriveAction
+        else:
+            print 'Using softmax action selection.'
+            findAction = self.deriveActionSoftmax
+
+        # Initialize Q            
+        Q = self.init_Q( optimistic_value )    
         
         return_list = list()
             
         now = time.time()            
+        
         # For a number of episodes
-        for n in range(1,episodes+1):
+        for n in xrange(1,episodes+1):
             
-            if n % 10 == 0:
+            if n % 100 == 0:
                 print 'Episode {0}, time taken: {1}.'.format(n, time.time()-now)
                 now = time.time()
                 
@@ -263,21 +283,16 @@ class Predator():
             while not prey_caught:      
                 step_number += 1
                
-                # If epsilon-greedy action selection is used
-                if epsilon > 0:
-                    # Choose a from s using policy derived from Q (epsilon greedy)
-                    a = self.deriveAction(Q, s, epsilon)
-                elif tau > 0:
-                    a = self.deriveActionSoftmax(Q, s, tau)
+                # Choose action a from state s using policy derived from Q 
+                # (epsilon greedy or softmax, based on arguments tau and 
+                # epsilon)
+                a = findAction(Q, s, epsilon_or_tau)
                 
                 # Take action a, observe r, s_prime
                 r, s_prime, prey_caught = self.takeAction(s, a)                
                 
                 # Determine which action maximizes Q(s,a)
-                max_Q = 0
-                for possible_a in self.actions:
-                    if Q[s_prime][possible_a] > max_Q:
-                        max_Q = Q[s_prime][possible_a]
+                max_Q = Q[s_prime][argmax( Q[s_prime] )]
                 
                 # Update Q
                 Q[s][a] = Q[s][a] + alpha * (r + gamma * max_Q - Q[s][a])
@@ -285,26 +300,32 @@ class Predator():
                 # Update the state        
                 s = s_prime
                 
-                # In this case, only the last step contains reward > 0, but it
-                # is implemented for the general case anyway                
-                #total_return += gamma**step_number * r
-                
             # Finds both the average number of steps and return for X
             # simulations using a given Q.
-            #average_steps = self.simulate_X_times_using_Q(100, Q, epsilon)
+            average_steps = self.simulate_X_times_using_Q(100, 
+                                                          Q, 
+                                                          epsilon_or_tau, 
+                                                          epsilongreedy)
         
-            #return_list.append(average_steps) 
+            return_list.append(average_steps) 
 
         # Return the found Qvalues and simulation data
         return Q, return_list
             
-    def simulate_X_times_using_Q( self, X, Q, epsilon):
+    def simulate_X_times_using_Q( self, X, Q, epsilon_or_tau, epsilongreedy):
         '''
         Simulate the environment containing prey and predator a number of X
         times, using a state-action value function Q, for an epsilon greedy
         policy derived from Q. Returns an average number of steps needed to 
         catch the prey.        
         '''
+
+        # This construction enables the use of softmax or epsilongreedy        
+        if epsilongreedy:
+            findAction = self.deriveAction
+        else:
+            findAction = self.deriveActionSoftmax
+        
         # Keep track of the total number of steps
         total_step_numbers = 0
         
@@ -319,8 +340,8 @@ class Predator():
             while not prey_caught:      
                 step_number += 1
                 # Choose a from s using policy derived from Q (epsilon greedy)
-                a = self.deriveAction(Q, s, epsilon)
-                
+                a = findAction(Q, s, epsilon_or_tau)
+
                 # Take action a, observe r, s_prime
                 r, s_prime, prey_caught = self.takeAction(s, a)                
                 
@@ -332,26 +353,22 @@ class Predator():
         
         return average_number_of_steps
      
-    def deriveAction(self, Q, s, epsilon):
+    def deriveAction( self, Q, s, epsilon ):
         '''
         Find an action using Q, the current state, and epsilon, in an 
         epsilon-greedy fashion. 
         '''
         
         # Find the action that maximizes Q[(s, a)]                
-        max_Q = -1
-        best_a = None
         prob_actions = dict()        
         uniform_epsilon = epsilon / (len(self.actions))
         
         for possible_a in self.actions:
-            if Q[s][possible_a] > max_Q:
-                max_Q = Q[s][possible_a]
-                best_a = possible_a
             # Set probabilities of all actions uniformly
             prob_actions[possible_a] = uniform_epsilon
         
         # Give the best action for this state a probability of 1
+        best_a = argmax( Q[s] )
         prob_actions[best_a] += 1 - epsilon
                     
         # For every action, check if the cumulative probability exceeds a 
@@ -364,7 +381,7 @@ class Predator():
             if cumulative_prob >= random_number:                
                 return a
     
-    def deriveActionSoftmax(self, Q, s, tau):
+    def deriveActionSoftmax( self, Q, s, tau ):
         '''
         Find an action using Q, the current state s, and the temperature, 
         a measure similar to epsilon.
@@ -390,7 +407,7 @@ class Predator():
             if cumulative_prob >= random_number:                
                 return a
 
-    def updatePolicyEpsilonGreedy(self, s, best_a, epsilon):
+    def updatePolicyEpsilonGreedy( self, s, best_a, epsilon ):
         '''
         Given a state and the best action, this function sets the predators 
         policy so that in state s, the probability of taking action best_a is
@@ -407,7 +424,7 @@ class Predator():
         # Give the new action for this state a probability of 1
         self.policy[(s,best_a)] += 1 - epsilon
       
-    def takeAction(self, s, a):
+    def takeAction( self, s, a ):
         ''' 
         Perform one step of the episode, given the current state and an action.
         '''
@@ -431,18 +448,11 @@ class Predator():
         A = self.actions
 
         # Create dictionaries for Q and Returns
-        Q = dict()
+        Q = self.init_Q()
+        
         Returns = dict()
-        '''
-        for s in Terminal:
-            Q[s] = dict()
-            for a in A:
-                Q[s][a] = 0
-        '''
         for s in S:
-            Q[s] = dict()
             for a in A:
-                Q[s][a] = 15
                 Returns[(s,a)] = []
                 self.policy[(s,a)] = 1.0 / len( A )
                 
@@ -452,6 +462,7 @@ class Predator():
         
         while forever:
             i += 1
+            # Stop if a max number of iterations is reached
             forever = i < max_iter
             prey_caught = False
             episode = []
@@ -471,15 +482,17 @@ class Predator():
             step = len( episode ) - 1
             for s,a in episode:
                 if s not in seen:
+                    # Compute the return for this state
                     R = r * gamma ** step 
                     Returns[(s,a)].append( R )
-                    Q[s][a] = sum( Returns[(s,a)] ) / float( len( Returns[(s,a)] ) )
+                    Q[s][a] = sum(Returns[(s,a)]) / float(len(Returns[(s,a)]))
                     seen.add( s )
                 step -= 1
                 
             # (c) For each s in the episode
             for s,_ in episode:
+                # Find the optimal action
                 a_star = argmax( Q[s] )
-                
+                # Update the policy
                 self.updatePolicyEpsilonGreedy( s, a_star, epsilon )
         return Q
