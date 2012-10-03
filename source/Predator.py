@@ -378,7 +378,7 @@ class Predator():
 
         return r, s_prime, terminal
         
-    def onPolicyMonteCarloControl( self, epsilon=0.1 ):
+    def onPolicyMonteCarloControl( self, epsilon=0.1, gamma=0.8 ):
         
          # Initialize parameters        
         
@@ -403,21 +403,22 @@ class Predator():
         forever = True
         
         while forever:
-            print i
             i += 1
             forever = i < max_iter
             prey_caught = False
             episode = []
             s = s_start
             R = 0.0
+            step = 0
             
             # (a) Generate episode using the current policy
             while not prey_caught:
                 a = self.getAction( s )
                 r, s_prime, prey_caught = self.takeAction( s, a )
-                R += r
+                R += r * gamma ** step
                 episode.append( (s,a) )
                 s = s_prime
+                step += 1
             
             # (b) For each pair (s,a) in the episode
             for s,a in episode:
@@ -429,3 +430,5 @@ class Predator():
                 a_star = argmax( Q[s] )
                 
                 self.updatePolicyEpsilonGreedy( s, a_star, epsilon )
+                
+        return Q
