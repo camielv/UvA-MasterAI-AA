@@ -374,27 +374,31 @@ class Predator():
 
         return r, s_prime, terminal
         
-    def onPolicyMonteCarloControl( self, epsilon=0.1, gamma=0.8 ):
+    def onPolicyMonteCarloControl( self, epsilon=0.1, gamma=0.8, max_iter=1000 ):
         
          # Initialize parameters        
         
         # Initialize S and V
-        S,_ = self.Environment.getStates()
+        S,Terminal = self.Environment.getStates()
         A = self.actions
 
         # Create dictionaries for Q and Returns
         Q = dict()
         Returns = dict()
-        
-        for s in S:
+        '''
+        for s in Terminal:
             Q[s] = dict()
             for a in A:
                 Q[s][a] = 0
+        '''
+        for s in S:
+            Q[s] = dict()
+            for a in A:
+                Q[s][a] = 15
                 Returns[(s,a)] = []
                 self.policy[(s,a)] = 1.0 / len( A )
                 
         s_start = (random.randint(-5,5),random.randint(-5,5))
-        max_iter = 100        
         i = 0
         forever = True
         
@@ -411,16 +415,20 @@ class Predator():
             while not prey_caught:
                 a = self.getAction( s )
                 r, s_prime, prey_caught = self.takeAction( s, a )
-                R += r * gamma ** step
                 episode.append( (s,a) )
                 s = s_prime
-                step += 1
             
             # (b) For each pair (s,a) in the episode
+            seen = set()
+            step = len( episode ) - 1
             for s,a in episode:
-                Returns[(s,a)].append( R )
-                Q[s][a] = sum( Returns[(s,a)] ) / len( Returns[(s,a)] )
-            
+                if s not in seen:
+                    R = r * gamma ** step 
+                    Returns[(s,a)].append( R )
+                    Q[s][a] = sum( Returns[(s,a)] ) / float( len( Returns[(s,a)] ) )
+                    seen.add( s )
+                step -= 1
+                
             # (c) For each s in the episode
             for s,_ in episode:
                 a_star = argmax( Q[s] )
