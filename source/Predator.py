@@ -143,19 +143,28 @@ class Predator():
         # Give the new action for this state a probability of 1
         self.policy[(s,best_a)] = 1.0
        
-    def sarsa( self, episodes=1000, alpha=0.1, gamma=0.1, epsilon=0.1 ):
+    def sarsa( self, 
+               episodes=250, 
+               alpha=0.1, 
+               gamma=0.1, 
+               epsilon=0.1,
+               optimistic_init=15 ):
         '''
         Implementation of Sarsa given the learning rate alpha, discount
         factor gamma, epislon for epsilon-greedy policy, and the number of
         episodes.
         '''
         # Initialize Q
-        Q = self.init_Q
+        Q = self.init_Q(optimistic_init)
 
-        for n in xrange( episodes ):
-            if n%100 == 0:
-                print "Episodes: ", n
-
+        return_list = list()
+        now = time.time()
+        
+        for n in xrange(1, episodes + 1):
+            if n % 50 == 0:
+                print 'Episode {0}, time taken: {1}.'.format(n, time.time()-now)
+                now = time.time()
+            
             # Current state
             s = (random.randint(-5,5), random.randint(-5,5))
             prey_caught = False
@@ -176,7 +185,16 @@ class Predator():
                 # Update state and action
                 s = s_prime
                 a = a_prime
-        return Q
+            # Finds both the average number of steps and return for X
+            # simulations using a given Q.
+            average_steps = self.simulate_X_times_using_Q(100, 
+                                                          Q, 
+                                                          epsilon, 
+                                                          epsilongreedy=True)
+        
+            return_list.append(average_steps) 
+
+        return Q, return_list
 
     def deriveActionSarsa( self, Q, s, epsilon ):
         '''
@@ -203,7 +221,7 @@ class Predator():
         cumulative_prob = 0.0
         
         for a in self.actions:
-            cumulative_prob += prob_actions[(s,a)]
+            cumulative_prob += prob_actions[a]
             if cumulative_prob >= random_number:                
                 return a
 
@@ -269,7 +287,7 @@ class Predator():
         # For a number of episodes
         for n in xrange(1,episodes+1):
             
-            if n % 100 == 0:
+            if n % 50 == 0:
                 print 'Episode {0}, time taken: {1}.'.format(n, time.time()-now)
                 now = time.time()
                 
@@ -391,8 +409,12 @@ class Predator():
         # Determine the probability of each action
         denominator = 0
         for b in self.actions:
-            denominator += exp(Q[s][b] / float(tau))
-
+            try:
+                denominator += exp(Q[s][b] / float(tau))
+            except:
+                print tau
+                print Q[s][b]
+                
         for a in self.actions:
             numerator = exp(Q[s][a] / float(tau))
             prob_actions[a] = numerator / denominator
@@ -439,34 +461,53 @@ class Predator():
 
         return r, s_prime, terminal
         
-    def onPolicyMonteCarloControl( self, epsilon=0.1, gamma=0.8, max_iter=1000 ):
+    def onPolicyMonteCarloControl( self, 
+                                   episodes=250,
+                                   epsilon=0.1, 
+                                   gamma=0.8, 
+                                   optimistic_init=15 ):
+        '''
+        Q, return_list <- onPolicyMonteCarloControl(epsilon,
+                                                    gamma,
+                                                    max_iter,
+                                                    optimistic_init)        
         
-         # Initialize parameters        
+        Performs Monte Carlo estimation of state action values, using an 
+        epsilon-greedy policy, discount factor gamma, maximum number of 
+        iterations max_iter, and the optimistic initialization for Q. 
+        '''
         
         # Initialize S and V
         S,Terminal = self.Environment.getStates()
         A = self.actions
 
         # Create dictionaries for Q and Returns
-        Q = self.init_Q()
+        Q = self.init_Q( optimistic_init )
         
         Returns = dict()
         for s in S:
             for a in A:
-                Returns[(s,a)] = []
+                Returns[(s,a)] = list()
                 self.policy[(s,a)] = 1.0 / len( A )
                 
-        s_start = (random.randint(-5,5),random.randint(-5,5))
-        i = 0
+        n = 0
         forever = True
+        return_list = list()
+
+        now = time.time()
         
         while forever:
-            i += 1
+            n += 1
             # Stop if a max number of iterations is reached
-            forever = i < max_iter
+            forever = n < max_iter
+            
+            if n % 50 == 0:
+                print 'Episode {0}, time taken: {1}.'.format(n, time.time()-now)
+                now = time.time()
+            
             prey_caught = False
-            episode = []
-            s = s_start
+            episode = list()
+            s = (random.randint(-5,5),random.randint(-5,5))
             R = 0.0
             step = 0
             
@@ -495,4 +536,14 @@ class Predator():
                 a_star = argmax( Q[s] )
                 # Update the policy
                 self.updatePolicyEpsilonGreedy( s, a_star, epsilon )
-        return Q
+                
+            # Finds both the average number of steps and return for X
+            # simulations using a given Q.
+            average_steps = self.simulate_X_times_using_Q(100, 
+                                                          Q, 
+                                                          epsilon, 
+                                                          epsilongreedy=True)
+        
+            return_list.append(average_steps) 
+
+        return Q, return_list

@@ -20,44 +20,44 @@ class VisualizeData():
         self.Environment = EnvironmentReduced.EnvironmentReduced()
         self.Predator = self.Environment.Predator
         
-    def plotPerformance(self, episodes=250):
+    def plotPerformance(self,  method, episodes=250):
         '''
         Executes qlearning for different discount and learning rates, and plots
-        the results.
+        the results. Possible methods are:
+            self.Predator.onPolicyMonteCarloControl
+            self.Predator.sarsa
+            self.Predator.qLearning
         '''
-        x = np.arange(0, episodes)
-        epsilon = 0.1
         
-        for gamma in [0.1, 0.3, 0.5, 0.7, 0.9]:
-            i = 0
-            for alpha in [0.1, 0.2, 0.3, 0.4, 0.5]:
+        x = np.arange(0, episodes)
+        
+        for g in [0.1, 0.3, 0.5, 0.7, 0.9]:
+            for a in [0.1, 0.2, 0.3, 0.4, 0.5]:
                 print '\nPerformance measure of Qlearning for gamma = ' + \
-                      '{0} and alpha = {1}'.format(gamma, alpha)
+                      '{0} and alpha = {1}'.format(g, a)
 
-                      
-                Q, return_list = self.Predator.qLearning(episodes,
-                                                         alpha, 
-                                                         gamma, 
-                                                         epsilon)
-                i += 1
+                Q, return_list = method(episodes=episodes,
+                                        alpha=a, 
+                                        gamma=g, 
+                                        epsilon=0.1)
                 
                 return_list = self.smoothListTriangle(return_list, degree=10)
                                         
-                plt.plot(x, np.array(return_list), label='Alpha {0}'.format(alpha))
+                plt.plot(x, np.array(return_list), label='Alpha {0}'.format(a))
             
             plt.legend()  
             plt.xlabel('Number of episodes')
             plt.ylabel('Number of steps taken')
-            plt.title('The agent\'s performance (smoothed), gamma = {0}.'.format(gamma))
+            plt.title('The agent\'s performance (smoothed), gamma = {0}.'.format(g))
             plt.show()
-            
+        
     def plotSoftmaxPerformance(self, episodes=250):        
         '''
         Executes Q-learning for different temperatures, and plots the results.                
         '''
         x = np.arange(0, episodes)
 
-        for t in [1, 0.5, 0.1, 0.01]:
+        for t in [1,2,3,4,5]:
             Q, return_list = self.Predator.qLearning(episodes,
                                                      alpha=0.1,
                                                      gamma=0.7,
