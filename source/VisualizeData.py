@@ -19,12 +19,40 @@ class VisualizeData():
     def __init__(self):
         self.Environment = EnvironmentReduced.EnvironmentReduced()
         self.Predator = self.Environment.Predator
+       
+    def plotEpsilon(self, method, episodes = 250):
+        '''
+        Executes qlearning for different epsilon, and plots
+        the results. Possible methods are:
+            self.Predator.sarsa
+            self.Predator.qLearning
+        '''
+        x = np.arange(0, episodes)
+        
+        for e in [0.3, 0.2, 0.1, 0.05]:
+            print '\nPerformance measure of', method, 'for epsilons.'
+
+            Q, return_list = method(episodes=episodes,
+                                    alpha=0.1, 
+                                    gamma=0.7, 
+                                    epsilon=e,
+                                    simulate=True)
+            
+            return_list = self.smoothListTriangle(return_list, degree=10)
+                                    
+            plt.plot(x, np.array(return_list), label='Epsilon {0}'.format(e))
+        
+        plt.legend()  
+        plt.xlabel('Number of episodes')
+        plt.ylabel('Number of steps taken')
+        plt.title('The agent\'s performance (smoothed)')
+        plt.show()
+
         
     def plotPerformance(self,  method, episodes=250):
         '''
         Executes qlearning for different discount and learning rates, and plots
         the results. Possible methods are:
-            self.Predator.onPolicyMonteCarloControl
             self.Predator.sarsa
             self.Predator.qLearning
         '''
@@ -182,3 +210,4 @@ class VisualizeData():
                              )
             smoothed.append(sum(selection* weight) / float(sum(weight)))
         return smoothed  
+
