@@ -264,7 +264,7 @@ class Predator():
                    gamma=0.1, 
                    epsilon_or_tau=0.1, 
                    epsilongreedy=True,
-                   optimistic_value=15,
+                   optimistic_init=15,
                    simulate=False ):
         '''
         Q, return_list <- qLearning(episodes, 

@@ -104,7 +104,7 @@ class VisualizeData():
         plt.title('The agent\'s performance (using\nsoftmax action selection).')
         plt.show()
             
-    def plotOptimisticInits(self, episodes=250):
+    def plotOptimisticInits(self, method, episodes=250):
         '''
         Executes Q-learning for different optimistic initializations of Q, and 
         plots the results.                
@@ -112,12 +112,12 @@ class VisualizeData():
         x = np.arange(0, episodes)
 
         for c in [5, 15, 25]:
-            Q, return_list = self.Predator.qLearning(episodes,
-                                                     alpha=0.1,
-                                                     gamma=0.7,
-                                                     epsilon_or_tau=0.1,
-                                                     epsilongreedy=True,
-                                                     optimistic_value=c)
+            Q, return_list = method(episodes,
+                                    alpha=0.1,
+                                    gamma=0.7,
+                                    epsilon=0.1,
+                                    optimistic_init=c,
+                                    simulate=True)
                                                      
             return_list = self.smoothListTriangle(return_list, degree=10)
             
