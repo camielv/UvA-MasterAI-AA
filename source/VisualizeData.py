@@ -30,7 +30,7 @@ class VisualizeData():
         x = np.arange(0, episodes)
         
         for e in [0.3, 0.2, 0.1, 0.05]:
-            print '\nPerformance measure of', method, 'for epsilons.'
+            print '\nPerformance measure of', method, 'for epsilon {0}.'.format(e)
 
             Q, return_list = method(episodes=episodes,
                                     alpha=0.1, 
