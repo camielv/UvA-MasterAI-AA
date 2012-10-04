@@ -167,8 +167,7 @@ class Predator():
         '''
         # Initialize Q
         Q = self.init_Q(optimistic_init)
-        if simulate:
-            return_list = list()
+        return_list = list()
         
         now = time.time()
         
@@ -258,7 +257,7 @@ class Predator():
         for s in self.Environment.terminal_states:
             Q[s] = dict()            
             for a in self.actions:
-                Q[s][a] = 0        
+                Q[s][a] = 0    
 
         return Q
 
@@ -523,8 +522,7 @@ class Predator():
         n = 0
         forever = True
        
-        if simulate:
-            return_list = list()
+        return_list = list()
 
         now = time.time()
         
@@ -555,6 +553,7 @@ class Predator():
             
             # (b) For each pair (s,a) in the episode
             seen = set()
+            total_number_of_steps = len(episode)
             step = len( episode ) - 1
             for s,a in episode:
                 if s not in seen:
@@ -580,8 +579,9 @@ class Predator():
                                                           epsilon, 
                                                           epsilongreedy=True)
         
-                return_list.append(average_steps) 
+            else:
+                average_steps = total_number_of_steps
+            return_list.append(average_steps) 
 
-        if simulate:
-            return Q, return_list
-        return Q
+        return Q, return_list
+    
