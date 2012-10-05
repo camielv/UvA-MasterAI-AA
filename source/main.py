@@ -88,6 +88,6 @@ print '\nAction (0,1) should approximate 10.0, all other actions 0.\n\n'
 
 
 print 'Standing still in state (1,0) is the second best action: \n'+\
-      'the return will _very_ probably be a factor gamma (0.1) times as \n'+\
+      'the return will _very_ probably be a factor gamma 0.1 times as \n'+\
       'large as the best move. This is why sometimes, action (0,0) has a \n'+\
       'value that approximates 1.'
