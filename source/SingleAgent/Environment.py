@@ -21,22 +21,13 @@ class Environment:
                   width=11, 
                   height=11, 
                   preyLocation=(5,5), 
-                  predatorLocation=(0,0),
-                  numberOfPredators=1  ):
-                      
-        assert numberOfPredators > 0
-        assert numberOfPredators < 5
-        assert type(numberOfPredators) == int        
-        
+                  predatorLocation=(0,0) ): 
         self.width  = width
         self.height = height
         self.S,self.terminal_states = self.getStates()
 
         self.Prey = Prey( self, preyLocation )
-        self.PredatorLocations = [(0,0), (10,0), (0,10), (10,10)]
-
-        self.Predators = [Predator(self, self.predatorLocations[i]) \
-                          for i in range(numberOfPredators)]        
+        self.Predators = Predator( self, predatorLocation )
     
                         
                 
