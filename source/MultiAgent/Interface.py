@@ -1,4 +1,4 @@
-# Assignment:   Single Agent Planning
+# Assignment:   Multi Agent Planning and Learning
 # Course:       Autonomous Agents 2012-2013
 # Education:    Master Artificial Intelligence
 # By:           Steven Laan
@@ -15,7 +15,7 @@ class Interface():
     ''' Graphical Interface for displaying the environment '''
 
     # Constructor
-    def __init__( self, size = (11, 11), s = (0, 0, 5, 5) ):
+    def __init__( self, size = (11, 11), locationList = [1,1,5,5, ):
         ''' Constructor for setting up the GUI '''
         pygame.init()
         
@@ -29,8 +29,6 @@ class Interface():
         self.size = size
         self.offset = 100
         self.half_offset = 50
-        self.quit = False
-        self.again = False
         self.resolution = ( self.offset + size[0] * 50, \
                            self.offset + size[1] * 50 )
         self.screen = pygame.display.set_mode( self.resolution )
@@ -42,17 +40,18 @@ class Interface():
         self.background.fill( (255, 255, 255) )
         self.__drawBoard()
 
+        # Prey sprite
+        self.prey = pygame.image.load( "images/prey.png" ).convert()
+        self.prey_rect = self.prey.get_rect()
+        self.prey_rect.left = (self.half_offset) + (locationList[0] * 51) + 1
+        self.prey_rect.top  = (self.half_offset) + (locationList[1] * 51) + 1
+
         # Predator sprite
         self.predator = pygame.image.load( "images/predator.png" ).convert()
         self.predator_rect = self.predator.get_rect()
         self.predator_rect.left = (self.half_offset) + (s[0] * 51) + 1
         self.predator_rect.top  = (self.half_offset) + (s[1] * 51) + 1
 
-        # Prey sprite
-        self.prey = pygame.image.load( "images/prey.png" ).convert()
-        self.prey_rect = self.prey.get_rect()
-        self.prey_rect.left = (self.half_offset) + (s[2] * 51) + 1
-        self.prey_rect.top  = (self.half_offset) + (s[3] * 51) + 1
 
     def __del__( self ):
         pygame.quit()
@@ -87,13 +86,12 @@ class Interface():
 
     def run( self ):
         ''' Updates the screen and checks for quit events '''
-        self.E.valueIteration()
         done = False
         running = True
  
         print "Start simulation"
         while not(done):
-            # Run a step
+           # Run a step
             if running:
                 self.E.run()
 
