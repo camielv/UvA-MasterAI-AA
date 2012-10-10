@@ -157,6 +157,21 @@ class Environment:
         else:
             return 0, False
 
+    def derriveState( self, locations ):
+        '''
+        Derrives the the reduced state representation from the locations of the prey and the predators
+        '''
+        state = list()
+        prey_x, prey_y = locations[0]
+
+        for i in range( self.numberOfPredators ):
+            predator_x, predator_y = locations[i+1]
+            x = ( ( 5 + prey_x - predator_x ) % ( max_x ) ) - 5
+            y = ( ( 5 + prey_y - predator_y ) % ( max_y ) ) - 5
+            state.append( (x, y) )
+    
+        return state
+
     def reset(self):
         '''
         Reset the position of the prey and predator in this environment.        
