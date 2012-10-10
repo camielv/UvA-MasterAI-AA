@@ -31,9 +31,9 @@ class Environment:
         
         self.width  = width
         self.height = height
-        self.S,self.terminal_states = self.getStates()
         self.numberOfPredators = numberOfPredators
-
+        self.S,self.terminal_states = self.getStates()
+        
         self.Prey = Prey( self, preyLocation )
         self.PredatorLocations = [(0,0), (10,0), (0,10), (10,10)]
 
@@ -96,7 +96,7 @@ class Environment:
         
                 # All agents take one QLearning step simultaneously, but we
                 # calculate the state that results from the prey's new position
-                actions = list()                
+                actions = list()              
                 for Agent in self.Agents:                    
                     # Find a sample action (epsilon-greedy) given the state
                     a = self.Agent.deriveAction(s)
@@ -113,9 +113,12 @@ class Environment:
                 r, game_over = self.reward(s_prime)
                 
                 # Update Q for each agent
-                for Agent in self.Agents:
-                    Agent.QLearning.updateQ( s, a, s_prime, r )
-                
+                for i in xrange(len(self.Agents)):
+                    self.Agents[i].QLearning.updateQ( s, 
+                                                      actions[i], 
+                                                      s_prime, 
+                                                      r )
+                # Update the state
                 s = s_prime
            
     def getStates(self):
