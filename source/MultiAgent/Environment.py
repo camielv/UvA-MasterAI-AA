@@ -37,7 +37,7 @@ class Environment:
         self.Prey = Prey( self, preyLocation )
         self.PredatorLocations = [(0,0), (10,0), (0,10), (10,10)]
 
-        self.Predators = [Predator(self, self.predatorLocations[i]) \
+        self.Predators = [Predator(self, self.PredatorLocations[i]) \
                           for i in range(self.numberOfPredators)]        
 
            
@@ -51,28 +51,15 @@ class Environment:
         
     def qLearning( self, 
            episodes=1000, 
-           alpha=0.1, 
-           gamma=0.1, 
-           epsilon=0.1, 
            optimistic_init=15,
            verbose=False):
         '''
         Q, return_list <- qLearning(episodes, 
-                                    alpha, 
-                                    gamma, 
-                                    epsilon,
-                                    optimistic_init)
+                                    optimistic_init,
+                                    verbose)
         
-        Implementation of Q-learning given the learning rate alpha, discount
-        factor gamma, epsilon for epsilon-greedy policy or temperature tau for
-        softmax action selection. Integer optimistic_init is used 
+        Implementation of Q-learning. Integer optimistic_init is used 
         to initialize Q, and should be larger than zero.
-
-        Note that if epsilongreedy == False, epsilon will be used as the 
-        temperature tau.
-        
-        Returns the values of Q as a 2-deep dict (Q[s][a]) and a list
-        containing performance measures of the agent (number of steps).
         '''
         
         now = time.time()            
@@ -84,8 +71,8 @@ class Environment:
                 now = time.time()
                 
             # Initialize the beginstate s semi-randomly
-            s = [(0,0)] + [(random.randint(-5,5), random.randint(-5,5)) \
-                           for i in range(self.numberOfPredators)]
+            s = ((0,0),) + tuple([(random.randint(-5,5), random.randint(-5,5))\
+                           for i in range(self.numberOfPredators)])
 
             game_over = False
             step_number = 0           
@@ -99,11 +86,14 @@ class Environment:
                 actions = list()              
                 for Agent in self.Agents:                    
                     # Find a sample action (epsilon-greedy) given the state
-                    a = self.Agent.deriveAction(s)
-                    actions.append(a)
+                    a = self.Agent.getActionEpsilonGreedy(s)
                     
                     # Perform that action
                     Agent.performAction(Agent.Q, s, Agent.epsilon)
+
+                    # And save it                    
+                    actions.append(a)
+                                        
                     
                 # Derive the new state from updated agent locations
                 s_prime = self.deriveState([Agent.location for Agent in \
@@ -123,6 +113,8 @@ class Environment:
            
     def getStates(self):
         '''
+        S, terminal_states <- getStates()        
+        
         Gets the entire statespace in two sets, the first containing the non-
         terminal states and the second containing terminal states.
         '''
@@ -136,9 +128,9 @@ class Environment:
                     s.append( (i,j) )
                 # If absorbing (reached predator/two predators at one spot)
                 if (0,0) in s or len(s) != len(set(s)):
-                    terminal_states.add( s )
+                    terminal_states.add( tuple(s) )
                 else:
-                    S.add( s )
+                    S.add( tuple(s) )
                     
         return S, terminal_states    
     
@@ -159,20 +151,22 @@ class Environment:
             return 10, True
         else:
             return 0, False
-
-    def derriveState( self, locations ):
+ 
+    def deriveState( self, locations ):
         '''
-        Derrives the the reduced state representation from the locations of the prey and the predators
+        state <- deriveState( locations )        
+        
+        Derive the state based on the locations of the prey and the predators.
         '''
         state = list()
         prey_x, prey_y = locations[0]
 
         for i in range( self.numberOfPredators ):
             predator_x, predator_y = locations[i+1]
-            x = ( ( 5 + prey_x - predator_x ) % ( max_x ) ) - 5
-            y = ( ( 5 + prey_y - predator_y ) % ( max_y ) ) - 5
+            x = ( ( 5 + prey_x - predator_x ) % ( self.width ) ) - 5
+            y = ( ( 5 + prey_y - predator_y ) % ( self.height ) ) - 5
             state.append( (x, y) )
-    
+
         return state
 
     def reset(self):

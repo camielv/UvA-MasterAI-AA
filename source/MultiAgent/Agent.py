@@ -8,10 +8,9 @@
 # File:         Agent.py
 # Description:  Agent is an abstract class 
 
-from QLearning import QLearning
-
 import random
-from iteritems import izip
+from itertools import izip
+from QLearning import QLearning
 
 argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]    
 
@@ -31,9 +30,10 @@ class Agent():
     location = None
 
     def __init__( self, environment, location=(0,0) ):        
+        
         self.Environment = environment
         self.location = location
-        self.QLearning = QLearning( self )        
+        self.QLearning = QLearning( self,  0.5, 0.7, 0.1, 5)        
         
         # For every non-terminal state in the statespace, determine the 
         # possible actions and their probabilities (random at first).
@@ -41,11 +41,11 @@ class Agent():
             for a in self.actions:
                 self.policy[(s,a)] = 0.2
 
-
-    def deriveAction( self, s ):
+    def getActionEpsilonGreedy( self, s ):
         '''
-        Find an action using the current state and Q, in an 
-        epsilon-greedy fashion. 
+        a <- getActionEpsilonGreedy(s)
+        
+        Find an action using the current state s, in an epsilon-greedy fashion. 
         '''
         # Find the action that maximizes Q[(s, a)]                
         prob_actions = dict()        
@@ -71,7 +71,9 @@ class Agent():
     
     def getAction( self, s ):
         '''
-        Get an action given the current state, using the policy. 
+        a <- getAction(s)        
+        
+        Get an action given the current state s, using the policy. 
         '''
         random_number = random.random()
 
@@ -84,39 +86,18 @@ class Agent():
             if cumulative_prob >= random_number:                
                 return a
 
-    def performAction( self, s, a ):
+    def performAction( self, a ):
         ''' 
-        s_prime <- performAction( s, a )        
+        s_prime <- performAction( a )        
         
-        Find the next state s_prime based on a given action a and the current 
-        state s. Return that next state.
+        Update the location of an agent based on a given action a.
         '''
-        d_x, d_y  = a
-        old_x, old_y = s
+        old_x, old_y = self.location
 
-        max_x = self.Environment.width
-        max_y = self.Environment.height
-
-        # There are, for this environment, 3 cases per dimension:
-        if old_x < 0:
-            # If the predator is not on the same y-axis as the prey, a move
-            # in horizontal direction will be either towards or away from 
-            # the prey, or a standstill.
-            new_x = ((old_x + 5 - a[0]) % max_x)-5
-        elif old_x > 0:
-            new_x = ((old_x + 5 - a[0]) % max_x)-5
-        elif old_x == 0:
-            # If it is on the same y-axis, any action in horizontal direction 
-            # will be a move away from the prey.
-            new_x = -a[0]
-            
-        # The same principle applies to moves in vertical direction
-        if old_y < 0:   
-            new_y = ((old_y + 5 - a[1]) % max_y)-5
-        elif old_y > 0:
-            new_y = ((old_y + 5 - a[1]) % max_y)-5
-        elif old_y == 0:
-            new_y = -a[1]
-
-        return (new_x, new_y)
-
+        new_x = old_x + a[0] % self.Environment.width
+        new_y = old_y + a[1] % self.Environment.height
+        
+        self.location = (new_x, new_y)
+        
+    def updateQ(self, s, a, s_prime, r):
+        raise NotImplementedError

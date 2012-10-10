@@ -10,7 +10,7 @@
 
 import time    
 import random
-from iteritems import izip
+from itertools import izip
     
 argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]    
     
@@ -23,24 +23,25 @@ class QLearning():
         '''
         Fill all values of Q based on a given optimistic value.
         '''
-        self.Q = dict()
-        # Value of any nonterminal state is the optimistic value
-        for s in self.Environment.S:
-            self.Q[s] = dict()            
-            for a in self.actions:
-                self.Q[s][a] = optimistic_value
-
-        # Value of absorbing state(s) is 0
-        for s in self.Environment.terminal_states:
-            self.Q[s] = dict()            
-            for a in self.actions:
-                self.Q[s][a] = 0    
-
         # Set the agent for this QLearning session
         self.Agent = Agent
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
+
+        # Value of any nonterminal state is the optimistic value
+        self.Q = dict()
+        for s in self.Agent.Environment.S:
+            self.Q[s] = dict()            
+            for a in self.Agent.actions:
+                self.Q[s][a] = optimistic_value
+
+        # Value of absorbing state(s) is 0
+        for s in self.Agent.Environment.terminal_states:
+            self.Q[s] = dict()            
+            for a in self.Agent.actions:
+                self.Q[s][a] = 0    
+
         
     def updateQ(self, s, a, s_prime, r):
         '''
