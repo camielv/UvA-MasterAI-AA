@@ -26,7 +26,7 @@ class Interface():
         self.clock = pygame.time.Clock()
 
         # Environment
-        self.E = Environment()
+#        self.E = Environment()
 
         # Setup the main screen
         self.size = size
@@ -61,6 +61,9 @@ class Interface():
             self.predators_rect[count].left = (self.half_offset) + (locationList[i] * 51) + 1
             self.predators_rect[count].top  = (self.half_offset) + (locationList[i+1] * 51) + 1
             count += 1
+
+        # Setup music
+        pygame.mixer.music.load( "../music/BennyHillShow.mp3" )
 
 
     def __del__( self ):
@@ -99,12 +102,13 @@ class Interface():
         ''' Updates the screen and checks for quit events '''
         done = False
         running = True
+        pygame.mixer.music.play(-1)
  
         print "Start simulation"
         while not(done):
            # Run a step
-            if running:
-                self.E.run()
+ #           if running:
+ #               self.E.run()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -114,15 +118,15 @@ class Interface():
                     self.E.reset()
                     running = True
 
-            for i in range( self.E.numberOfPredators ):
-                self.setPredator( i, self.E.predators[i].location )
-            self.setPrey( self.E.prey.location )
+  #          for i in range( self.E.numberOfPredators ):
+  #              self.setPredator( i, self.E.predators[i].location )
+  #          self.setPrey( self.E.prey.location )
             self.__update()
             self.clock.tick(10)
 
-            for i in range( self.E.numberOfPredators ):
-                if self.E.predators[i].location == self.E.prey.location:
-                    running = False
+ #           for i in range( self.E.numberOfPredators ):
+ #               if self.E.predators[i].location == self.E.prey.location:
+ #                   running = False
 
 if __name__ == '__main__':
     GUI = Interface()
