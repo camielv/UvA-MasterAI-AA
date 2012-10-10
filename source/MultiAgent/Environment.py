@@ -39,7 +39,7 @@ class Environment:
 
         self.Predators = [Predator(self, self.PredatorLocations[i]) \
                           for i in range(self.numberOfPredators)]        
-
+        self.Agents = [self.Prey] + self.Predators
            
     def environmentStep(self):
         '''
@@ -86,7 +86,7 @@ class Environment:
                 actions = list()              
                 for Agent in self.Agents:                    
                     # Find a sample action (epsilon-greedy) given the state
-                    a = self.Agent.getActionEpsilonGreedy(s)
+                    a = Agent.getActionEpsilonGreedy(s)
                     
                     # Perform that action
                     Agent.performAction(Agent.Q, s, Agent.epsilon)
