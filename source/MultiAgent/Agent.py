@@ -29,17 +29,20 @@ class Agent():
     policy = dict()
     location = None
 
-    def __init__( self, environment, location=(0,0) ):        
+    def __init__( self, environment, location=(0,0), policy=None):        
         
         self.Environment = environment
         self.location = location
-        self.QLearning = QLearning( self,  0.5, 0.7, 0.1, 5)        
+        self.QLearning = QLearning( self,  0.5, 0.7, 0.1, 5 )        
         
         # For every non-terminal state in the statespace, determine the 
         # possible actions and their probabilities (random at first).
-        for s in self.Environment.S:
-            for a in self.actions:
-                self.policy[(s,a)] = 0.2
+        if policy:
+            self.policy = policy
+        else:
+            for s in self.Environment.S:
+                for a in self.actions:
+                    self.policy[(s,a)] = 1.0 / len(self.actions)
 
     def getActionEpsilonGreedy( self, s ):
         '''
@@ -57,6 +60,7 @@ class Agent():
         
         # Give the best action for this state a probability of 1
         best_a = argmax( self.QLearning.Q[s] )
+            
         prob_actions[best_a] += 1 - self.QLearning.epsilon
                     
         # For every action, check if the cumulative probability exceeds a 
@@ -87,17 +91,7 @@ class Agent():
                 return a
 
     def performAction( self, a ):
-        ''' 
-        s_prime <- performAction( a )        
-        
-        Update the location of an agent based on a given action a.
-        '''
-        old_x, old_y = self.location
-
-        new_x = old_x + a[0] % self.Environment.width
-        new_y = old_y + a[1] % self.Environment.height
-        
-        self.location = (new_x, new_y)
+        raise NotImplementedError        
         
     def updateQ(self, s, a, s_prime, r):
         raise NotImplementedError

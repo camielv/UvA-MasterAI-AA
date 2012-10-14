@@ -37,7 +37,7 @@ class QLearning():
                 self.Q[s][a] = optimistic_value
 
         # Value of absorbing state(s) is 0
-        for s in self.Agent.Environment.terminal_states:
+        for s in self.Agent.Environment.terminal_states:            
             self.Q[s] = dict()            
             for a in self.Agent.actions:
                 self.Q[s][a] = 0    
@@ -48,9 +48,10 @@ class QLearning():
         Perform one step for this agent for a given state s. Action, resulting
         state s_prime, and observed reward r are also given.         
         '''
+            
         # Determine which action maximizes Q(s,a)
         max_Q = self.Q[s_prime][argmax( self.Q[s_prime] )]
         
         # Update Q
         self.Q[s][a] += self.alpha * (r + self.gamma * max_Q - self.Q[s][a])
-       
+        
