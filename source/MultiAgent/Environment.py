@@ -13,6 +13,25 @@ from Prey import Prey
 import itertools
 import time
 import random
+from tables import *
+
+'''
+Pytables use instructions
+ 1. Maak een h5 file aan
+ 2. Maak een group aan aan de hand van die h5file
+ 3. Maak een tabel zoals je een klasse met fields aan zou maken
+ 4. Maak de tabel daadwerkelijk aan mbv de h5file
+ 5. Maak een rowobject aan
+ 6. Vul de row
+ 7. Append de row
+ 8. Repeat 5-7
+ 9. Flush de tabel (wat het ook is , het zorgt ervoor dat I/O niet meer mogelijk is:D)
+10. Maak een readobject aan mbv de h5file
+11. Lees de tabel uit als een iterable    
+'''
+
+class States(IsDescription):
+    absorbing = BoolCol()
 
 class Environment:
     '''
@@ -32,18 +51,75 @@ class Environment:
         self.width  = width
         self.height = height
         self.numberOfPredators = numberOfPredators
+        
         print "Determining the statespace..."
-        self.S,self.terminal_states = self.getStates()
-        print "Size of the statespace: {} states.".format(len(self.S) + \
-                                                          len(self.terminal_states))
+
+        
+        self.h5file = openFile("Environment.h5", mode = "w", title = "EnvironmentFile")
+        self.group = self.h5file.createGroup(self.h5file.root, 'EnvironmentGroup')
+        StateTable = self.h5file.createTable(self.group, 'States', States, "Readout states", Filters(1))
+        
+        # close the file, and open it again in append mode
+        self.h5file.close()
+        self.h5file = openFile("Environment.h5", "a")
+        group = self.h5file.root.EnvironmentGroup
+        StateTable = group.States
+        
+        # Get a description of table in dictionary format
+        descr = StateTable.description._v_colObjects
+        descr2 = descr.copy()
+        
+        # Add x columns to description
+        for n in range(numberOfPredators):
+            descr2["x_pos{0}".format(n)] = Int16Col()
+            descr2["y_pos{0}".format(n)] = Int16Col()
+        print descr2
+            
+        # Create a new table with the new description
+        CopyTable = self.h5file.createTable(group, 'CopyTable', descr2, "Copytable", Filters(1))
+        # Copy the user attributes
+        StateTable.attrs._f_copy(CopyTable)
+        
+                
+        # Copy the columns of source table to destination
+        for col in descr:
+            getattr(CopyTable.cols, col)[:] = getattr(StateTable.cols, col)[:]
+        
+        # Remove the original table
+        StateTable.remove()
+        
+        # Move CopyTable to table
+        CopyTable.move('/EnvironmentGroup','StateTable')
+        
+        # Print the new table
+        print "Contents of the table with column added:", self.h5file.root.EnvironmentGroup.StateTable[:]
+        
+        print self.h5file
+        self.StateTable = self.h5file.root.EnvironmentGroup.StateTable
+        
+        # Fill the states
+        self.getStates()       
+       
+        '''
+        print "Size of the statespace: {0} states.".format(self.StateTable.)
+
         print "Adding agents to the environment.."
-        self.Prey = Prey( self, preyLocation )
+        
+        agent_number = range(1,numberOfPredators+2)
+        print agent_number[0]
+        self.Prey = Prey( self, preyLocation, agent_ID=(agent_number[0]) )        
         self.PredatorLocations = [(0,0), (10,0), (0,10), (10,10)]
-        self.Predators = [Predator(self, self.PredatorLocations[i]) \
+        self.Predators = [Predator(self, self.PredatorLocations[i], agent_number, agent_ID[i]) \
                           for i in range(self.numberOfPredators)]        
+
         self.Agents = [self.Prey] + self.Predators
+        
+        for Agent in self.Agents:
+            agent_number += 1
+            Agent.agent_ID = agent_number
+            
         print 'Environment initialized.'
-           
+        '''           
     def environmentStep(self):
         '''
         s_prime = environmentStep()
@@ -144,29 +220,37 @@ class Environment:
           
     def getStates(self):
         '''
-        S, terminal_states <- getStates()        
+        StateTable <- getStates()        
         
-        Gets the entire statespace in two sets, the first containing the non-
-        terminal states and the second containing terminal states.
+        Gets the entire statespace in a PyTable, containing the non-absorbing
+        states and absorbing states.
         '''
-        S = set()
-        terminal_states = set()
         
         # Get all possible positions        
         allLocs = list()
         for i in xrange(-5, 6):
             for j in xrange(-5,6):
                 allLocs.append( (i,j) )
-
+        
         # Get combinations of P positions
+        StateRow = self.StateTable.row
+
+        # Get all columnNames in the form [(x_0, y_0), (x_1, y_1) ... ]
+        colNames = zip(['x_pos{0}'.format(i) for i in range(self.numberOfPredators)],
+                       ['y_pos{0}'.format(i) for i in range(self.numberOfPredators)])
+        colNames = [x for y in colNames for x in y]
+        print colNames
+        
+        iterator = xrange(self.numberOfPredators)
         for s in self.permutations(allLocs, self.numberOfPredators):
+            for i in iterator:
+                StateRow[colNames[i*2]] = s[i][0]
+                StateRow[colNames[i*2+1]] = s[i][1]
             # If absorbing (reached predator/two predators at one spot)
-            if (0,0) in s or len(s) != len(set(s)):
-                terminal_states.add( tuple(s) )
-            else:
-                S.add( tuple(s) )
-        return S, terminal_states    
-    
+            StateRow['absorbing'] = ((0,0) in s or len(s) != len(set(s)))
+            StateRow.append()
+        # Flush the filled statetable
+        self.StateTable.flush()
     
     def permutations(self, iterable, r=None):
         '''

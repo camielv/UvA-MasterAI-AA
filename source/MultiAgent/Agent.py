@@ -29,11 +29,12 @@ class Agent():
     policy = dict()
     location = None
 
-    def __init__( self, environment, location=(0,0), policy=None):        
+    def __init__( self, environment, agent_ID, location=(0,0), policy=None):        
         
         self.Environment = environment
         self.location = location
         self.QLearning = QLearning( self,  0.5, 0.7, 0.1, 5 )        
+        self.agent_ID = agent_ID
         
         # For every non-terminal state in the statespace, determine the 
         # possible actions and their probabilities (random at first).
