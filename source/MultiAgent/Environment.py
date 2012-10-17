@@ -115,12 +115,15 @@ class Environment:
                 r, game_over = self.reward(s_prime)
 
                 # Update Q for each agent
-                print ''
                 for i in xrange(len(self.Agents)):  
                     self.Agents[i].updateQ( s, 
                                             actions[i], 
                                             s_prime, 
                                             r )
+                #if s == ((0,1),):
+                #    print 'Game over?', game_over, '\n'
+                #    print r
+                #    raw_input()
                 # Update the state
                 s = s_prime
                 

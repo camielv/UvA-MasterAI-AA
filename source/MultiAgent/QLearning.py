@@ -59,13 +59,19 @@ class QLearning():
         state s_prime, and observed reward r are also given.         
         '''        
         # If needed, initialize Q[s]
-        if not s_prime in self.Q:        
+        if not s_prime in self.Q:
             self.initQ(s_prime)
+        #elif s == ((0,1),):
+        #    print 'Move from ((0,1)), action  ', a
+        #    print 'Q before update:', self.Q[s][a]
+        #    print 'Reward', r 
+            
         
         max_Q = self.Q[s_prime][argmax( self.Q[s_prime] )]
+
         
         # Update Q. Q[s][a] should already be known to us.
         self.Q[s][a] += self.alpha * (r + self.gamma * max_Q - self.Q[s][a])
         
-        print "Update Q", s, a, self.Q[s][a]
-        
+        #if s == ((0,1),):
+        #    print 'Q after update:', self.Q[s][a]
