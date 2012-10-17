@@ -63,7 +63,7 @@ class Environment:
         learning_agents is a list containing booleans, indicating which agents
         should learn. The first agent is the prey, 
         '''
-        state_total = 11**numberOfPredators
+        state_total = 121**self.numberOfPredators
 
         # Set the learning rate of each agent
         learning_rates = [0.3 for i in xrange(len(self.Agents))] if \
@@ -115,8 +115,8 @@ class Environment:
                 r, game_over = self.reward(s_prime)
 
                 # Update Q for each agent
-                for i in xrange(len(self.Agents)):
-                    
+                print ''
+                for i in xrange(len(self.Agents)):  
                     self.Agents[i].updateQ( s, 
                                             actions[i], 
                                             s_prime, 
