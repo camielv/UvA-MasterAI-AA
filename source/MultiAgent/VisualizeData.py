@@ -37,7 +37,9 @@ class VisualizeData():
                                                     learning_rates=learning_rates)
 
         return_list = self.smoothListTriangle(return_list, degree=10)
-                                
+                
+        np.save( 'result', np.array( return_list ) )
+                
         plt.plot(x, np.array(return_list))
         
         plt.xlabel('Number of episodes')
