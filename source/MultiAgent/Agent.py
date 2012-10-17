@@ -70,23 +70,13 @@ class Agent():
         '''
         a <- getAction(s)        
         
-        Get an action given the current state s, using the policy. 
+        Get the optimal action given the current state s, using Q[s]. 
         '''
-        random_number = random.random()
-
-        cumulative_prob = 0.0
+        if not s in self.QLearning.Q:
+            self.QLearning.initQ(s)
+        best_a = argmax( self.QLearning.Q[s] )        
         
-        if s not in self.policy:
-            self.policy[s] = dict()
-            for a in self.actions:
-                self.policy[s][a] = 1.0 / len(self.actions)
-        
-        # For every action, check if the cumulative probability exceeds a 
-        # random number. 
-        for a in self.actions:
-            cumulative_prob += self.policy[s][a]
-            if cumulative_prob >= random_number:                
-                return a
+        return best_a
 
     def performAction( self, a ):
         ''' 
@@ -96,8 +86,8 @@ class Agent():
         '''
         old_x, old_y = self.location
 
-        new_x = old_x + a[0] % self.Environment.width
-        new_y = old_y + a[1] % self.Environment.height
+        new_x = (old_x + a[0]) % self.Environment.width
+        new_y = (old_y + a[1]) % self.Environment.height
         
         self.location = (new_x, new_y)
         
