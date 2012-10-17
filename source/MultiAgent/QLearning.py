@@ -9,7 +9,7 @@
 # Description:  Implementation of Q-learning
 
 from itertools import izip
-    
+
 argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]    
     
 class QLearning():
@@ -17,17 +17,22 @@ class QLearning():
     Implementation of functions related to Q-learning.    
     '''
     
-    def __init__(self, Agent, alpha, gamma, epsilon, optimistic_value=5):
+    def __init__(self, 
+                 Agent, 
+                 alpha, 
+                 gamma, 
+                 epsilon, 
+                 optimistic_value=5):
         '''
         Fill all values of Q based on a given optimistic value.
         '''
+
         # Set the agent for this QLearning session
         self.Agent = Agent
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
 
-        # Value of any nonterminal state is the optimistic value
         self.Q = dict()
         self.optimistic_value = optimistic_value        
         
@@ -52,13 +57,11 @@ class QLearning():
         '''
         Perform one step for this agent for a given state s. Action, resulting
         state s_prime, and observed reward r are also given.         
-        '''
-        
+        '''        
         # If needed, initialize Q[s]
         if not s_prime in self.Q:        
             self.initQ(s_prime)
         
-        # Determine which action maximizes Q(s,a)        
         max_Q = self.Q[s_prime][argmax( self.Q[s_prime] )]
         
         # Update Q. Q[s][a] should already be known to us.

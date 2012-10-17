@@ -33,29 +33,32 @@ class Environment:
         self.height = height
         self.numberOfPredators = numberOfPredators
         
-        self.S = set()
-        self.terminal_states = set()
-        
         self.Prey = Prey( self, preyLocation )
         self.PredatorLocations = [(0,0), (10,0), (0,10), (10,10)]
-
         self.Predators = [Predator(self, self.PredatorLocations[i]) \
                           for i in range(self.numberOfPredators)]        
+
         self.Agents = [self.Prey] + self.Predators
-                 
+
+        
     def qLearning( self, 
-           episodes=1000, 
+           episodes, 
            optimistic_init=15,
            verbose=False,
-           return_num_of_steps=True
-           train_only = None):
+           return_num_of_steps=True,
+           learning_agents=None):
         '''
         Q, return_list <- qLearning(episodes, 
-                                    optimistic_init,
-                                    verbose)
+                                    optimistic_init=15,
+                                    verbose=True,
+                                    return_num_of_steps=True,
+                                    learning_agents=None)
         
         Implementation of Q-learning. Integer optimistic_init is used 
-        to initialize Q, and should be larger than zero.
+        to initialize Q, and should be larger than zero. Verbose is a boolean
+        indicating whether updates should be given by the system. 
+        Return_num_of_steps indicates whether the function should return the 
+        number of steps (if true), or the performance (if false).
         '''
         
         return_list = list()        
@@ -126,11 +129,11 @@ class Environment:
             Q_agents.append(Agent.QLearning.Q)
             
         return Q_agents, return_list
-          
+           
            
     def getStates(self):
         '''
-        S, terminal_states <- getStates()        
+        StateTable <- getStates()        
         
         Gets the entire statespace in two sets, the first containing the non-
         terminal states and the second containing terminal states. This fails 
