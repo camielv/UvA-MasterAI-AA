@@ -46,20 +46,29 @@ class Environment:
            optimistic_init=15,
            verbose=False,
            return_num_of_steps=True,
-           learning_agents=None):
+           learning_rates=None):
         '''
         Q, return_list <- qLearning(episodes, 
                                     optimistic_init=15,
                                     verbose=True,
                                     return_num_of_steps=True,
-                                    learning_agents=None)
+                                    learning_rates=None)
         
         Implementation of Q-learning. Integer optimistic_init is used 
         to initialize Q, and should be larger than zero. Verbose is a boolean
         indicating whether updates should be given by the system. 
         Return_num_of_steps indicates whether the function should return the 
         number of steps (if true), or the performance (if false).
+        
+        learning_agents is a list containing booleans, indicating which agents
+        should learn. The first agent is the prey, 
         '''
+
+        # Set the learning rate of each agent
+        learning_rates = [0.7 for i in xrange(len(self.Agents))] if \
+                         learning_rates == None else learning_rates
+        for i in xrange(len(self.Agents)):
+            self.Agents[i].alpha = learning_rates[i]
         
         return_list = list()        
         now = time.time()            
@@ -215,3 +224,22 @@ class Environment:
         for Predator in self.Predators:
             Predator.location = (random.randint(-5,5), random.randint(-5,5))        
     
+    def simulateEnvironment(self, reset=False):
+        ''''
+        simulateEnvironment(reset=False)
+
+        Simulate the environment for one step. Location of each agent is 
+        updated. Returns a list of agent locations. 
+        '''         
+        if reset:
+            self.Prey.location = (5,5)
+            for i in xrange(self.numberOfPredators):
+                self.Predators[i].location = self.PredatorLocations[i]
+       
+        s = self.gameState()
+        
+        for Agent in self.Agents:
+            # Get an action based on Q
+            a = Agent.getAction(s)
+            # Update location
+            Agent.performAction(a)
