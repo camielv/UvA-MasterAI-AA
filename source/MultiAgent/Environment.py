@@ -50,7 +50,7 @@ class Environment:
         '''
         Q, return_list <- qLearning(episodes, 
                                     optimistic_init=15,
-                                    verbose=True,
+                                    verbose=False,
                                     return_num_of_steps=True,
                                     learning_rates=None)
         
@@ -63,9 +63,10 @@ class Environment:
         learning_agents is a list containing booleans, indicating which agents
         should learn. The first agent is the prey, 
         '''
+        state_total = 11**numberOfPredators
 
         # Set the learning rate of each agent
-        learning_rates = [0.7 for i in xrange(len(self.Agents))] if \
+        learning_rates = [0.3 for i in xrange(len(self.Agents))] if \
                          learning_rates == None else learning_rates
         for i in xrange(len(self.Agents)):
             self.Agents[i].QLearning.alpha = learning_rates[i]
@@ -79,7 +80,8 @@ class Environment:
             if verbose and n % 1000 == 0:
                 print 'Episode {0}, time taken: {1}.'.format(n, time.time()-now)
                 now = time.time()
-                print 'Total number of states encountered: {0}.'.format(len(self.Agents[0].QLearning.Q))
+                print 'Total number of states encountered: {0} out of {1}.'\
+                      .format(len(self.Agents[0].QLearning.Q), state_total)
                 
             # Initialize the beginstate s semi-randomly
             self.resetAgents()            
