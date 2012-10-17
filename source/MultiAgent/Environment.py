@@ -32,7 +32,9 @@ class Environment:
         self.width  = width
         self.height = height
         self.numberOfPredators = numberOfPredators
-        self.S,self.terminal_states = self.getStates()
+        
+        self.S = set()
+        self.terminal_states = set()
         
         self.Prey = Prey( self, preyLocation )
         self.PredatorLocations = [(0,0), (10,0), (0,10), (10,10)]
@@ -40,19 +42,13 @@ class Environment:
         self.Predators = [Predator(self, self.PredatorLocations[i]) \
                           for i in range(self.numberOfPredators)]        
         self.Agents = [self.Prey] + self.Predators
-           
-    def environmentStep(self):
-        '''
-        s_prime = environmentStep()
-        
-        Perform one step (for the prey and each predator), given the current 
-        state s.
-        '''
-        
+                 
     def qLearning( self, 
            episodes=1000, 
            optimistic_init=15,
-           verbose=False):
+           verbose=False,
+           return_num_of_steps=True
+           train_only = None):
         '''
         Q, return_list <- qLearning(episodes, 
                                     optimistic_init,
@@ -62,17 +58,19 @@ class Environment:
         to initialize Q, and should be larger than zero.
         '''
         
+        return_list = list()        
         now = time.time()            
         # For a number of episodes
         for n in xrange(1,episodes+1):
             
-            if verbose and n % 50 == 0:
+            if verbose and n % 1000 == 0:
                 print 'Episode {0}, time taken: {1}.'.format(n, time.time()-now)
                 now = time.time()
+                print 'Total number of states encountered: {0}.'.format(len(self.Agents[0].QLearning.Q))
                 
             # Initialize the beginstate s semi-randomly
-            s = ((0,0),) + tuple([(random.randint(-5,5), random.randint(-5,5))\
-                           for i in range(self.numberOfPredators)])
+            self.resetAgents()            
+            s = self.gameState()                                         
 
             game_over = False
             step_number = 0           
@@ -84,20 +82,19 @@ class Environment:
                 # All agents take one QLearning step simultaneously, but we
                 # calculate the state that results from the prey's new position
                 actions = list()              
-                for Agent in self.Agents:                    
+                for Agent in self.Agents:    
                     # Find a sample action (epsilon-greedy) given the state
                     a = Agent.getActionEpsilonGreedy(s)
                     
                     # Perform that action
-                    Agent.performAction(Agent.Q, s, Agent.epsilon)
+                    Agent.performAction(a)
 
                     # And save it                    
                     actions.append(a)
                                         
                     
                 # Derive the new state from updated agent locations
-                s_prime = self.deriveState([Agent.location for Agent in \
-                                            self.Agents])                                
+                s_prime = self.gameState()
                 
                 # This results in reward
                 r, game_over = self.reward(s_prime)
@@ -110,13 +107,35 @@ class Environment:
                                                       r )
                 # Update the state
                 s = s_prime
+        
+            if return_num_of_steps:       
+                return_list.append(step_number)
+            else:
+                total_return = list()
+                # Only the prey and one predator matter, since return is the
+                # same for every predator 
+                for Agent in self.Agents[0:2]:
+                    total_return.append( r * Agent.QLearning.alpha ** step_number)
+                # Negate prey reward, as reward function is from predator POV
+                total_return[0] = -total_return[0]
+                
+                return_list.append(total_return)
+           
+        Q_agents = list()
+        for Agent in self.Agents:
+            Q_agents.append(Agent.QLearning.Q)
+            
+        return Q_agents, return_list
+          
            
     def getStates(self):
         '''
         S, terminal_states <- getStates()        
         
         Gets the entire statespace in two sets, the first containing the non-
-        terminal states and the second containing terminal states.
+        terminal states and the second containing terminal states. This fails 
+        for a large number of agents, instead, we will generate states during 
+        runtime.
         '''
         S = set()
         terminal_states = set()
@@ -161,19 +180,35 @@ class Environment:
         state = list()
         prey_x, prey_y = locations[0]
 
-        for i in range( self.numberOfPredators ):
+        for i in xrange( self.numberOfPredators ):
             predator_x, predator_y = locations[i+1]
             x = ( ( 5 + prey_x - predator_x ) % ( self.width ) ) - 5
             y = ( ( 5 + prey_y - predator_y ) % ( self.height ) ) - 5
             state.append( (x, y) )
 
-        return state
+        return tuple(state)
 
-    def reset(self):
+    def gameState( self ):
+        '''
+        state <- deriveState( gameState ) 
+        
+        Derives the gamestate based on agents location
+        '''
+        state = list()
+        prey_x, prey_y = self.Prey.location
+        for Predator in self.Predators:
+            predator_x, predator_y = Predator.location
+            x = ( ( 5 + prey_x - predator_x ) % ( self.width ) ) - 5
+            y = ( ( 5 + prey_y - predator_y ) % ( self.height ) ) - 5
+            state.append( (x, y) )
+
+        return tuple(state)
+
+    def resetAgents(self):
         '''
         Reset the position of the prey and predator in this environment.        
         '''
         self.Prey.location = (5,5)
-        self.Predators = [Predator(self, self.predatorLocations[i]) \
-                          for i in range(self.numberOfPredators)]        
+        for Predator in self.Predators:
+            Predator.location = (random.randint(-5,5), random.randint(-5,5))        
     

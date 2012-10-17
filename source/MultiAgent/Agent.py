@@ -33,13 +33,7 @@ class Agent():
         
         self.Environment = environment
         self.location = location
-        self.QLearning = QLearning( self,  0.5, 0.7, 0.1, 5)        
-        
-        # For every non-terminal state in the statespace, determine the 
-        # possible actions and their probabilities (random at first).
-        for s in self.Environment.S:
-            for a in self.actions:
-                self.policy[(s,a)] = 0.2
+        self.QLearning = QLearning( self,  0.5, 0.7, 0.1, 5)
 
     def getActionEpsilonGreedy( self, s ):
         '''
@@ -56,6 +50,9 @@ class Agent():
             prob_actions[possible_a] = uniform_epsilon
         
         # Give the best action for this state a probability of 1
+        if not s in self.QLearning.Q:        
+            self.QLearning.initQ(s)
+            
         best_a = argmax( self.QLearning.Q[s] )
         prob_actions[best_a] += 1 - self.QLearning.epsilon
                     
@@ -79,10 +76,15 @@ class Agent():
 
         cumulative_prob = 0.0
         
+        if s not in self.policy:
+            self.policy[s] = dict()
+            for a in self.actions:
+                self.policy[s][a] = 1.0 / len(self.actions)
+        
         # For every action, check if the cumulative probability exceeds a 
         # random number. 
         for a in self.actions:
-            cumulative_prob += self.policy[(s,a)]
+            cumulative_prob += self.policy[s][a]
             if cumulative_prob >= random_number:                
                 return a
 
