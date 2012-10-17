@@ -66,4 +66,3 @@ class QLearning():
         
         # Update Q. Q[s][a] should already be known to us.
         self.Q[s][a] += self.alpha * (r + self.gamma * max_Q - self.Q[s][a])
-       

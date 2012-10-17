@@ -70,8 +70,6 @@ class Environment:
         for i in xrange(len(self.Agents)):
             self.Agents[i].QLearning.alpha = learning_rates[i]
             self.Agents[i].QLearning.optimistic_value = optimistic_init
-
-            print self.Agents[i].QLearning.alpha 
         
         return_list = list()        
         now = time.time()            
@@ -106,25 +104,24 @@ class Environment:
                     Agent.performAction(a)
 
                     # And save it                    
-                    actions.append(a)
-                                        
+                    actions.append(a)            
                     
                 # Derive the new state from updated agent locations
                 s_prime = self.gameState()
                 
                 # This results in reward
                 r, game_over = self.reward(s_prime)
-                
+
                 # Update Q for each agent
-                print 'Agent loc', [Agent.location for Agent in self.Agents]
                 for i in xrange(len(self.Agents)):
-                    self.Agents[i].QLearning.updateQ( s, 
-                                                      actions[i], 
-                                                      s_prime, 
-                                                      r )
+                    
+                    self.Agents[i].updateQ( s, 
+                                            actions[i], 
+                                            s_prime, 
+                                            r )
                 # Update the state
                 s = s_prime
-        
+                
             if return_num_of_steps:       
                 return_list.append(step_number)
             else:
@@ -144,32 +141,6 @@ class Environment:
             
         return Q_agents, return_list
            
-           
-    def getStates(self):
-        '''
-        StateTable <- getStates()        
-        
-        Gets the entire statespace in two sets, the first containing the non-
-        terminal states and the second containing terminal states. This fails 
-        for a large number of agents, instead, we will generate states during 
-        runtime.
-        '''
-        S = set()
-        terminal_states = set()
-    
-        for i in xrange( -(self.width/2), self.width/2+1 ):
-            for j in xrange( -(self.height/2), self.height/2+1 ):
-                s = list() 
-                for p in xrange(self.numberOfPredators):
-                    s.append( (i,j) )
-                # If absorbing (reached predator/two predators at one spot)
-                if (0,0) in s or len(s) != len(set(s)):
-                    terminal_states.add( tuple(s) )
-                else:
-                    S.add( tuple(s) )
-                    
-        return S, terminal_states    
-    
     def reward( self, s ):
         '''
         r, game_over <- reward(s)
