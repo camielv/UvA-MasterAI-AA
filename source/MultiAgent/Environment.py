@@ -70,8 +70,6 @@ class Environment:
         for i in xrange(len(self.Agents)):
             self.Agents[i].QLearning.alpha = learning_rates[i]
             self.Agents[i].QLearning.optimistic_value = optimistic_init
-
-            print self.Agents[i].QLearning.alpha 
         
         return_list = list()        
         now = time.time()            
@@ -106,8 +104,7 @@ class Environment:
                     Agent.performAction(a)
 
                     # And save it                    
-                    actions.append(a)
-                                        
+                    actions.append(a)            
                     
                 # Derive the new state from updated agent locations
                 s_prime = self.gameState()
@@ -117,14 +114,14 @@ class Environment:
 
                 # Update Q for each agent
                 for i in xrange(len(self.Agents)):
-                    print self.Agents[i].QLearning.Q
+                    
                     self.Agents[i].updateQ( s, 
                                             actions[i], 
                                             s_prime, 
                                             r )
                 # Update the state
                 s = s_prime
-        
+                
             if return_num_of_steps:       
                 return_list.append(step_number)
             else:
@@ -157,7 +154,7 @@ class Environment:
         # Prioritize confusion of predators            
         if len(s) != len(set(s)):
             return -10, True
-        elif (0,0):
+        elif (0,0) in s:
             return 10, True
         else:
             return 0, False
