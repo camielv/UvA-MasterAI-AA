@@ -114,14 +114,14 @@ class Environment:
                 
                 # This results in reward
                 r, game_over = self.reward(s_prime)
-                
+
                 # Update Q for each agent
-                print 'Agent loc', [Agent.location for Agent in self.Agents]
                 for i in xrange(len(self.Agents)):
-                    self.Agents[i].QLearning.updateQ( s, 
-                                                      actions[i], 
-                                                      s_prime, 
-                                                      r )
+                    print self.Agents[i].QLearning.Q
+                    self.Agents[i].updateQ( s, 
+                                            actions[i], 
+                                            s_prime, 
+                                            r )
                 # Update the state
                 s = s_prime
         
@@ -144,32 +144,6 @@ class Environment:
             
         return Q_agents, return_list
            
-           
-    def getStates(self):
-        '''
-        StateTable <- getStates()        
-        
-        Gets the entire statespace in two sets, the first containing the non-
-        terminal states and the second containing terminal states. This fails 
-        for a large number of agents, instead, we will generate states during 
-        runtime.
-        '''
-        S = set()
-        terminal_states = set()
-    
-        for i in xrange( -(self.width/2), self.width/2+1 ):
-            for j in xrange( -(self.height/2), self.height/2+1 ):
-                s = list() 
-                for p in xrange(self.numberOfPredators):
-                    s.append( (i,j) )
-                # If absorbing (reached predator/two predators at one spot)
-                if (0,0) in s or len(s) != len(set(s)):
-                    terminal_states.add( tuple(s) )
-                else:
-                    S.add( tuple(s) )
-                    
-        return S, terminal_states    
-    
     def reward( self, s ):
         '''
         r, game_over <- reward(s)
@@ -183,7 +157,7 @@ class Environment:
         # Prioritize confusion of predators            
         if len(s) != len(set(s)):
             return -10, True
-        elif (0,0) in s:
+        elif (0,0):
             return 10, True
         else:
             return 0, False

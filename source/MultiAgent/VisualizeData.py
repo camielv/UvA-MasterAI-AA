@@ -20,7 +20,7 @@ class VisualizeData():
         self.Environment = Environment(numberOfPredators=numberOfPredators) if \
             environment == None else environment
        
-    def plotPerformance(self, episodes=10000):
+    def plotPerformance(self, episodes=10000, learning_rates=None):
         '''
         Executes qlearning for different discount and learning rates, and plots
         the results. Possible methods are:
@@ -33,7 +33,8 @@ class VisualizeData():
         print '\nExecuting performance measure of Q-Learning.'
 
         Q, return_list = self.Environment.qLearning(episodes, 10, True,
-                                                    return_num_of_steps=True)
+                                                    return_num_of_steps=True,
+                                                    learning_rates=learning_rates)
 
         return_list = self.smoothListTriangle(return_list, degree=10)
                                 
@@ -44,7 +45,7 @@ class VisualizeData():
         plt.title('Performance measure for all agents')
         plt.show()
     
-    def plotReturn(self, episodes=100000):
+    def plotReturn(self, episodes=100000, learning_rates=None):
         '''
         Executes qlearning for different discount and learning rates, and plots
         the results. Possible methods are:
@@ -57,7 +58,8 @@ class VisualizeData():
         print '\nExecuting performance measure of Q-Learning.'
 
         Q, return_list = self.Environment.qLearning(episodes, 10, True, 
-                                                    return_num_of_steps=False)
+                                                    return_num_of_steps=False,
+                                                    learning_rates=learning_rates)
         print return_list        
         return_list = np.array(return_list)
         print return_list
@@ -132,4 +134,11 @@ class VisualizeData():
 import sys
 if __name__=="__main__":
     v = VisualizeData(numberOfPredators=int(sys.argv[1]))
-    v.plotPerformance(int(sys.argv[2]))
+    if len(sys.argv) == 3:
+        print "Performing Q-Learning for {0} episodes.".format(sys.argv[2])
+        v.plotPerformance(int(sys.argv[2]))
+    if len(sys.argv) == 4:
+        print "Performing Q-Learning with learning rates", sys.argv[3]
+        v.plotPerformance(int(sys.argv[2]), eval(sys.argv[3]))
+    
+    
