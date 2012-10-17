@@ -15,18 +15,17 @@ class Interface():
     ''' Graphical Interface for displaying the environment '''
 
     # Constructor
-    def __init__( self, size = (11, 11), locationList = [5,5,0,0,10,0,0,10,10,10] ):
+    def __init__( self, size = (11, 11), predators = 2 ):
         ''' Constructor for setting up the GUI '''
-        assert len(locationList) % 2 == 0
-        assert len(locationList) >= 4
-        assert len(locationList) <= 10
         pygame.init()
         
         # Clock init
         self.clock = pygame.time.Clock()
 
         # Environment
-#        self.E = Environment()
+        self.E = Environment( numberOfPredators=predators )
+        self.E.qLearning( 10000 )
+        self.E.resetAgents()
 
         # Setup the main screen
         self.size = size
@@ -44,23 +43,22 @@ class Interface():
         self.__drawBoard()
 
         # Prey sprite
-        self.prey = pygame.image.load( "../images/prey.png" ).convert()
-        self.prey_rect = self.prey.get_rect()
-        self.prey_rect.left = (self.half_offset) + (locationList[0] * 51) + 1
-        self.prey_rect.top  = (self.half_offset) + (locationList[1] * 51) + 1
+        self.Prey = pygame.image.load( "../images/prey.png" ).convert()
+        self.Prey_rect = self.Prey.get_rect()
+        x, y = self.E.Prey.location
+        self.Prey_rect.left = (self.half_offset) + (x * 51) + 1
+        self.Prey_rect.top  = (self.half_offset) + (y * 51) + 1
+        
+        self.Predators      = list()
+        self.Predators_rect = list()
 
         # Predator sprite
-        self.number_predators = (len(locationList) / 2) - 1
-        self.predators = list()
-        self.predators_rect = list()
-
-        count = 0
-        for i in range(2, len(locationList), 2):
-            self.predators.append( pygame.image.load( "../images/predator.png" ).convert() )
-            self.predators_rect.append( self.predators[count].get_rect() )
-            self.predators_rect[count].left = (self.half_offset) + (locationList[i] * 51) + 1
-            self.predators_rect[count].top  = (self.half_offset) + (locationList[i+1] * 51) + 1
-            count += 1
+        for i in range(self.E.numberOfPredators):
+            self.Predators.append( pygame.image.load( "../images/predator.png" ).convert() )
+            x, y = self.E.Predators[i].location
+            self.Predators_rect.append( self.Predators[i].get_rect() )
+            self.Predators_rect[i].left = (self.half_offset) + (x * 51) + 1
+            self.Predators_rect[i].top  = (self.half_offset) + (y * 51) + 1
 
         # Setup music
         pygame.mixer.music.load( "../music/BennyHillShow.mp3" )
@@ -80,9 +78,9 @@ class Interface():
         ''' Updates the location of the predator and the prey on the screen '''
         # Create new frame
         frame = self.background.copy()
-        frame.blit( self.prey, self.prey_rect )
-        for i in range( self.number_predators ):
-            frame.blit( self.predators[i], self.predators_rect[i] )
+        frame.blit( self.Prey, self.Prey_rect )
+        for i in range( self.E.numberOfPredators ):
+            frame.blit( self.Predators[i], self.Predators_rect[i] )
         
         # Display frame
         self.screen.blit( frame, (0, 0) )
@@ -90,43 +88,48 @@ class Interface():
 
     def setPredator( self, i, location ):
         ''' Sets the predator location on the screen '''
-        self.predators_rect[i].left = (self.half_offset) + ( (location[0] % self.size[0] ) * 51) + 1
-        self.predators_rect[i].top  = (self.half_offset) + ( (location[1] % self.size[1] ) * 51) + 1
+        self.Predators_rect[i].left = (self.half_offset) + ( (location[0] % self.size[0] ) * 51) + 1
+        self.Predators_rect[i].top  = (self.half_offset) + ( (location[1] % self.size[1] ) * 51) + 1
 
     def setPrey( self, location ):
         ''' Sets the prey location on the screen '''
-        self.prey_rect.left = (self.half_offset) + ( (location[0] % self.size[0]) * 51) + 1
-        self.prey_rect.top  = (self.half_offset) + ( (location[1] % self.size[1]) * 51) + 1
+        self.Prey_rect.left = (self.half_offset) + ( (location[0] % self.size[0]) * 51) + 1
+        self.Prey_rect.top  = (self.half_offset) + ( (location[1] % self.size[1]) * 51) + 1
 
     def run( self ):
         ''' Updates the screen and checks for quit events '''
         done = False
         running = True
+        start = True
         pygame.mixer.music.play(-1)
+        frame = 0
  
         print "Start simulation"
         while not(done):
-           # Run a step
- #           if running:
- #               self.E.run()
+            pygame.image.save( self.screen, "frame{0}.jpg".format( frame ) )
+            frame += 1
+
+            # Run a step
+            if running:
+                self.E.simulateEnvironment()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     done = True
                     break
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                    self.E.reset()
+                    self.E.resetAgents()
                     running = True
 
-  #          for i in range( self.E.numberOfPredators ):
-  #              self.setPredator( i, self.E.predators[i].location )
-  #          self.setPrey( self.E.prey.location )
+            for i in range( self.E.numberOfPredators ):
+                self.setPredator( i, self.E.Predators[i].location )
+            self.setPrey( self.E.Prey.location )
             self.__update()
             self.clock.tick(10)
 
- #           for i in range( self.E.numberOfPredators ):
- #               if self.E.predators[i].location == self.E.prey.location:
- #                   running = False
+            for i in range( self.E.numberOfPredators ):
+                if self.E.Predators[i].location == self.E.Prey.location:
+                    running = False
 
 if __name__ == '__main__':
     GUI = Interface()
