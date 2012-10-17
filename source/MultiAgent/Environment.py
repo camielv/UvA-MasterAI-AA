@@ -68,7 +68,10 @@ class Environment:
         learning_rates = [0.7 for i in xrange(len(self.Agents))] if \
                          learning_rates == None else learning_rates
         for i in xrange(len(self.Agents)):
-            self.Agents[i].alpha = learning_rates[i]
+            self.Agents[i].QLearning.alpha = learning_rates[i]
+            self.Agents[i].QLearning.optimistic_value = optimistic_init
+
+            print self.Agents[i].QLearning.alpha 
         
         return_list = list()        
         now = time.time()            
@@ -94,7 +97,8 @@ class Environment:
                 # All agents take one QLearning step simultaneously, but we
                 # calculate the state that results from the prey's new position
                 actions = list()              
-                for Agent in self.Agents:    
+                for Agent in self.Agents:   
+
                     # Find a sample action (epsilon-greedy) given the state
                     a = Agent.getActionEpsilonGreedy(s)
                     
@@ -112,6 +116,7 @@ class Environment:
                 r, game_over = self.reward(s_prime)
                 
                 # Update Q for each agent
+                print 'Agent loc', [Agent.location for Agent in self.Agents]
                 for i in xrange(len(self.Agents)):
                     self.Agents[i].QLearning.updateQ( s, 
                                                       actions[i], 
@@ -224,22 +229,17 @@ class Environment:
         for Predator in self.Predators:
             Predator.location = (random.randint(-5,5), random.randint(-5,5))        
     
-    def simulateEnvironment(self, reset=False):
+    def simulateEnvironment(self):
         ''''
         simulateEnvironment(reset=False)
 
         Simulate the environment for one step. Location of each agent is 
         updated. Returns a list of agent locations. 
-        '''         
-        if reset:
-            self.Prey.location = (5,5)
-            for i in xrange(self.numberOfPredators):
-                self.Predators[i].location = self.PredatorLocations[i]
-       
+        '''                
         s = self.gameState()
         
         for Agent in self.Agents:
             # Get an action based on Q
-            a = Agent.getAction(s)
+            a = Agent.getActionEpsilonGreedy(s)
             # Update location
             Agent.performAction(a)
