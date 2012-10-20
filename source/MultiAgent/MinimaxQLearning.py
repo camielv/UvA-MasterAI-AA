@@ -5,17 +5,18 @@ O = set( ['rock','paper','scissors'] )
 s = 'state'
 
 Q = dict()
+Q[s] = dict()
 for a in A:
     for o in O:
-        Q[(s,a,o)] = 0
+        Q[s][(a,o)] = 0
         
-Q[(s,'rock','paper')] = -1.0
-Q[(s,'scissors','rock')] = -1.0
-Q[(s,'paper','scissors')] = -1.0
+Q[s][('rock','paper')] = -1.0
+Q[s][('scissors','rock')] = -1.0
+Q[s][('paper','scissors')] = -1.0
 
-Q[(s,'paper','rock')] = 1.0
-Q[(s,'scissors','paper')] = 1.0
-Q[(s,'rock','scissors')] = 1.0
+Q[s][('paper','rock')] = 1.0
+Q[s][('scissors','paper')] = 1.0
+Q[s][('rock','scissors')] = 1.0
 
 
 try:
@@ -31,7 +32,7 @@ try:
     m.update()            
 
     # Set objective
-    m.setObjective( grb.LinExpr( [ ( Q[(s,a,o)], pi[a] ) for o in O for a in A ] ), grb.GRB.MAXIMIZE)
+    m.setObjective( grb.LinExpr( [ ( Q[s][(a,o)], pi[a] ) for o in O for a in A ] ), grb.GRB.MAXIMIZE)
 
     # Add constraint: Sum_a pi(a) = 1
     expr = grb.quicksum( m.getVars() )
@@ -39,7 +40,7 @@ try:
 
     # Add more constraints
     for o in O:
-        expr = grb.LinExpr( [ (Q[(s,a,o)], pi[a]) for a in A ] )
+        expr = grb.LinExpr( [ (Q[s][(a,o)], pi[a]) for a in A ] )
         m.addConstr( expr >= 0 )
     
     m.optimize()
