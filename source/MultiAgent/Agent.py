@@ -48,10 +48,6 @@ class Agent():
         for possible_a in self.actions:
             # Set probabilities of all actions uniformly
             prob_actions[possible_a] = uniform_epsilon
-        
-        # Give the best action for this state a probability of 1
-        if not s in self.QLearning.Q:        
-            self.QLearning.initQ(s)
             
         best_a = argmax( self.QLearning.Q[s] )
         prob_actions[best_a] += 1 - self.QLearning.epsilon
@@ -79,17 +75,7 @@ class Agent():
         return best_a
 
     def performAction( self, a ):
-        ''' 
-        s_prime <- performAction( a )        
-        
-        Update the location of an agent based on a given action a.
-        '''
-        old_x, old_y = self.location
-
-        new_x = (old_x + a[0]) % self.Environment.width
-        new_y = (old_y + a[1]) % self.Environment.height
-        
-        self.location = (new_x, new_y)
+        raise NotImplementedError
         
     def updateQ(self, s, a, s_prime, r):
         raise NotImplementedError

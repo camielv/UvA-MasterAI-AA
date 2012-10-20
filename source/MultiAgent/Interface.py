@@ -15,7 +15,7 @@ class Interface():
     ''' Graphical Interface for displaying the environment '''
 
     # Constructor
-    def __init__( self, size = (11, 11), predators = 2 ):
+    def __init__( self, size = (11, 11), predators = 1 ):
         ''' Constructor for setting up the GUI '''
         pygame.init()
         
@@ -23,8 +23,9 @@ class Interface():
         self.clock = pygame.time.Clock()
 
         # Environment
+        print "Initializing the agents and environment, performing training."
         self.E = Environment( numberOfPredators=predators )
-        self.E.qLearning( 10000 )
+        self.E.qLearning( 40000, verbose=True )
         self.E.resetAgents()
 
         # Setup the main screen
