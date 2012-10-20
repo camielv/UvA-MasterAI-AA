@@ -107,8 +107,8 @@ class Interface():
  
         print "Start simulation"
         while not(done):
-            pygame.image.save( self.screen, "frame{0}.jpg".format( frame ) )
-            frame += 1
+            #pygame.image.save( self.screen, "frame{0}.jpg".format( frame ) )
+            #frame += 1
 
             # Run a step
             if running:
