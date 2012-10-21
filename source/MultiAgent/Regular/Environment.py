@@ -16,6 +16,7 @@ except:
     
 import time
 import random
+from collections import defaultdict
 
 class Environment:
     '''
@@ -163,6 +164,16 @@ class Environment:
         # Set of own actions and opponent actions
         A = set()        
         O = set() 
+        
+        if prey:
+            A = self.Prey.actions
+            if len( self.Predators ) == 2:
+                O = set( [ (a1,a2) for a1 in A for a2 in A ] )
+        else:
+            O = self.Prey.actions
+            if len( self.Predators ) == 2:
+                A = set( [ (a1,a2) for a1 in O for a2 in O ] )
+
         
         while not done:
             # In state s take action a and opponent action o to get reward r and
