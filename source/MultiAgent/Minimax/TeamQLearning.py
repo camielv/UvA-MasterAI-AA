@@ -56,6 +56,10 @@ class TeamQLearning():
         # Update Q. Q[s][a] should already be known to us.
         self.Q[s][(a,o)] = (1-self.alpha) * self.Q[s][(a,o)] + \
                            self.alpha * (r + self.gamma * self.V[s_prime])
-            
-        self.V[s] = self.Q[s][(a,o)]
+        minimum = None                           
+        for a in self.Agent.actions:
+            for o in self.Agent.actions:
+                if self.Q[s][(a,o)] < minimum:
+                    minimum = self.Q[s][(a,o)]
+        self.V[s] = minimum
  
