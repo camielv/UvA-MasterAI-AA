@@ -15,7 +15,7 @@ class Interface():
     ''' Graphical Interface for displaying the environment '''
 
     # Constructor
-    def __init__( self, size = (11, 11), predators = 1 ):
+    def __init__( self, size = (11, 11), predators = 1, episodes = 50000 ):
         ''' Constructor for setting up the GUI '''
         pygame.init()
         
@@ -24,9 +24,8 @@ class Interface():
 
         # Environment
         print "Initializing the agents and environment, performing training."
-        self.E = Environment( numberOfPredators=predators )
-        self.E.qLearning( 40000, verbose=True )
-        self.E.resetAgents()
+        self.E        = Environment( numberOfPredators=predators )
+        self.episodes = episodes
 
         # Setup the main screen
         self.size = size
@@ -44,7 +43,7 @@ class Interface():
         self.__drawBoard()
 
         # Prey sprite
-        self.Prey = pygame.image.load( "../images/prey.png" ).convert()
+        self.Prey = pygame.image.load( "../../images/prey.png" ).convert()
         self.Prey_rect = self.Prey.get_rect()
         x, y = self.E.Prey.location
         self.Prey_rect.left = (self.half_offset) + (x * 51) + 1
@@ -55,14 +54,17 @@ class Interface():
 
         # Predator sprite
         for i in range(self.E.numberOfPredators):
-            self.Predators.append( pygame.image.load( "../images/predator.png" ).convert() )
+            self.Predators.append( pygame.image.load( "../../images/predator.png" ).convert() )
             x, y = self.E.Predators[i].location
             self.Predators_rect.append( self.Predators[i].get_rect() )
             self.Predators_rect[i].left = (self.half_offset) + (x * 51) + 1
             self.Predators_rect[i].top  = (self.half_offset) + (y * 51) + 1
 
         # Setup music
-        pygame.mixer.music.load( "../music/BennyHillShow.mp3" )
+        pygame.mixer.music.load( "../../music/BennyHillShow.mp3" )
+
+        # Setup screen
+        self.__update()
 
 
     def __del__( self ):
@@ -102,8 +104,9 @@ class Interface():
         done = False
         running = True
         start = True
+        self.E.qLearning( self.episodes, verbose=True )
+        self.E.resetAgents()
         pygame.mixer.music.play(-1)
-        frame = 0
  
         print "Start simulation"
         while not(done):
@@ -126,7 +129,7 @@ class Interface():
                 self.setPredator( i, self.E.Predators[i].location )
             self.setPrey( self.E.Prey.location )
             self.__update()
-            self.clock.tick(10)
+            self.clock.tick(5)
 
             for i in range( self.E.numberOfPredators ):
                 if self.E.Predators[i].location == self.E.Prey.location:
