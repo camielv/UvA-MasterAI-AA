@@ -9,7 +9,11 @@
 # Description:  Base class of the environment.
 from Predator import Predator
 from Prey import Prey
-
+try:
+    import gurobipy as grb
+except:
+    print 'No Gurobi = no minimax-Q-learning'
+    
 import time
 import random
 
@@ -146,6 +150,68 @@ class Environment:
             
         return Q_agents, return_list
            
+    def minimaxQLearning( self ):
+        done = False
+
+        alpha = 0.8
+        gamma = 0.8        
+        
+        s = 'starting_state'
+        Q = defaultdict()
+        V = defaultdict()
+        
+        # Set of own actions and opponent actions
+        A = set()        
+        O = set() 
+        
+        while not done:
+            # In state s take action a and opponent action o to get reward r and
+            # state s_prime
+            a = myTeamAction( s )
+            o = opponentTeamAction( s )
+            r, s_prime = self.step( s, a, o )
+            
+            Q[s][a,o] = (1-alpha) * Q[s][a,o] + alpha * (r + gamma* V[s_prime])
+           
+            # Use linear programming to obtain optimal policy for this state
+            try:
+                # Create a new model
+                m = grb.Model("MultiAgentMinimax")
+                
+                # Create variables
+                pi = dict()
+                for a in A:
+                    pi[a] = m.addVar( 0.0, 1.0, vtype = grb.GRB.CONTINUOUS, name = a )
+            
+                # Integrate new variables
+                m.update()            
+            
+                # Set objective
+                m.setObjective( grb.LinExpr( [ ( Q[s][(a,o)], pi[a] ) for o in O for a in A ] ), grb.GRB.MAXIMIZE)
+            
+                # Add constraint: Sum_a pi(a) = 1
+                expr = grb.quicksum( m.getVars() )
+                m.addConstr( expr == 1, "Total probability" )
+            
+                # Add more constraints
+                for o in O:
+                    expr = grb.LinExpr( [ (Q[s][(a,o)], pi[a]) for a in A ] )
+                    m.addConstr( expr >= 0 )
+                
+                m.optimize()
+            
+                for v in m.getVars():
+                    #print v.varName, v.x
+                    policy[s][tuple(v.varName)] = v.x
+            
+                #print 'Obj:', m.objVal
+            
+            except grb.GurobiError:
+                print 'Error reported'
+                
+            # Update V
+            V[s] = min( Q[s] )
+            
     def reward( self, s ):
         '''
         r, game_over <- reward(s)
