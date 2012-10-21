@@ -59,7 +59,7 @@ class TeamQLearning():
         minimum = None                           
         for a in self.Agent.actions:
             for o in self.Agent.actions:
-                if self.Q[s][(a,o)] < minimum:
+                if self.Q[s][(a,o)] < minimum or minimum == None:
                     minimum = self.Q[s][(a,o)]
         self.V[s] = minimum
  
