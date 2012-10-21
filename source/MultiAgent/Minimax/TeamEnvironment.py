@@ -110,7 +110,7 @@ class Environment:
         Derives the gamestate based on agents location
         '''
         state = list()
-        prey_x, prey_y = self.Prey.location
+        prey_x, prey_y = self.TeamPrey.Prey.location
         for Predator in self.TeamPredator.Predators:
             predator_x, predator_y = Predator.location
             x = ( ( 5 + prey_x - predator_x ) % ( self.width ) ) - 5
@@ -123,7 +123,7 @@ class Environment:
         '''
         Reset the position of the prey and predator in this environment.        
         '''
-        self.Prey.location = (5,5)
+        self.TeamPrey.Prey.location = (5,5)
         for Predator in self.TeamPredator.Predators:
             Predator.location = (random.randint(-5,5), random.randint(-5,5))        
     
