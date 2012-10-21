@@ -7,8 +7,8 @@ argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]
 
 class TeamPredator():
 
-    def __init__(self, environment, jointLocation):
-        self.environment = environment
+    def __init__(self, Environment, jointLocation):
+        self.Environment = Environment
         # Initialize Q
         alpha = 0.3
         gamma = 0.7
@@ -17,7 +17,7 @@ class TeamPredator():
         
         # Initialize the predators in this team
         self.Predators = [Predator(self.Environment, jointLocation[n]) \
-                          for n in xrange(self.environment.numberOfPredators)]
+                          for n in xrange(self.Environment.numberOfPredators)]
         self.actions = set([])
         for jointAction in self.permutations(self.Predators[0].actions, self.Environment.numberOfPredators):
             self.actions.add(jointAction) 
@@ -48,7 +48,7 @@ class TeamPredator():
             m.addConstr( expr == 1, "Total probability" )
         
             # Add more constraints
-            for o in self.environment.Prey.actions:
+            for o in self.Environment.Prey.actions:
                 expr = grb.LinExpr( [ (self.TeamQLearning.Q[s][(a,o)], pi[a]) for a in self.actions ] )
                 m.addConstr( expr >= 0 )
             

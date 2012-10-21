@@ -7,14 +7,14 @@ argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]
 
 class TeamPrey():
 
-    def __init__(self, environment, location):
-        self.environment = environment
+    def __init__(self, Environment, location):
+        self.Environment = Environment
         # Initialize Q
         alpha = 0.3
         gamma = 0.7
         epsilon = 0.1
         self.TeamQLearning = TeamQLearning(self, alpha, gamma, epsilon)
-        self.Prey = Prey(environment, location)
+        self.Prey = Prey(Environment, location)
             
     def updateQ(self, s, a, o, s_prime, r):
         '''
@@ -41,7 +41,7 @@ class TeamPrey():
             m.addConstr( expr == 1, "Total probability" )
         
             # Add more constraints
-            for o in self.environment.Prey.actions:
+            for o in self.Environment.Prey.actions:
                 expr = grb.LinExpr( [ (self.TeamQLearning.Q[s][(a,o)], pi[a]) for a in self.actions ] )
                 m.addConstr( expr >= 0 )
             
