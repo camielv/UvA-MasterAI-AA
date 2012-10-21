@@ -24,13 +24,12 @@ class Agent():
     ACTION_RIGHT = ( 0, 1)
     ACTION_LEFT  = ( 0,-1)
     ACTION_STAY  = ( 0, 0)   
-    
     actions = set([ACTION_UP, ACTION_DOWN, ACTION_RIGHT, ACTION_LEFT, ACTION_STAY])
     policy = dict()
     location = None
 
     def __init__( self, environment, location=(0,0) ):        
-        
+            
         self.Environment = environment
         self.location = location
         self.QLearning = QLearning( self, 0.5, 0.7, 0.1)

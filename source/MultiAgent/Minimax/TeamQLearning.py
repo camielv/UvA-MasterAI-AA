@@ -9,7 +9,7 @@
 # Description:  Implementation of Q-learning
 
 from itertools import izip
-from collections import defaultdict
+
 import numpy
 
 argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]    
@@ -33,12 +33,20 @@ class TeamQLearning():
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
-
-        defaultdefault = lambda : numpy.float(0.0)
-        default = lambda : defaultdict(defaultdefault)
-
-        self.Q = defaultdict(default)
-        self.V = defaultdict(defaultdefault)
+        self.policy = dict()
+        self.Q = dict()
+        self.V = dict()
+        S = set( [ (i,j) for i in range(-5,6) for j in range(-5,6)] )
+        for s in S:
+            self.V[s] = numpy.float16( 0 )
+            self.Q[s] = dict()
+            self.policy[s] = dict()
+            
+            for a in self.Agent.actions:
+                self.policy[s][a] = numpy.float16( 1.0 / len( self.Agent.actions ) )
+                
+                for o in self.Agent.actions:
+                    self.Q[s][(a,o)] = numpy.float16( 0.0 )
                     
     def updateQ(self, s, a, o, s_prime, r):
         '''
@@ -48,6 +56,6 @@ class TeamQLearning():
         # Update Q. Q[s][a] should already be known to us.
         self.Q[s][(a,o)] = (1-self.alpha) * self.Q[s][(a,o)] + \
                            self.alpha * (r + self.gamma * self.V[s_prime])
-                           
-        self.TeamQLearning.V[s] = min( self.TeamQLearning.Q[s] )
+            
+        self.V[s] = self.Q[s][(a,o)]
  

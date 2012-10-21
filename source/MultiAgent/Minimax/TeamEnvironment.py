@@ -38,14 +38,14 @@ class Environment:
         self.numberOfPredators = numberOfPredators
         
         self.TeamPrey = TeamPrey( self, preyLocation )
-        self.PredatorLocations = [(0,0), (10,0), (0,10), (10,10)]
-        self.TeamPredator = TeamPredator(self, self.PredatorLocations)
+        self.TeamPredator = TeamPredator(self, predatorLocation)
         
-    def minimaxQLearning( self ):
+    def minimaxQLearning( self, episodes = 1000 ):
 
         done = False
         self.resetAgents()
         s = self.gameState()
+        episode = 0
 
         while not done:
             # In state s take action a and opponent action o to get reward r and
@@ -56,8 +56,8 @@ class Environment:
             a_teamPrey = self.TeamPrey.getActionEpsilonGreedy( s )
             
             # Each team performs the found action
-            self.TeamPredator.performJointAction( s, a_teamPred )
-            self.TeamPrey.performAction( s, a_teamPrey )
+            self.TeamPredator.performAction( a_teamPred )
+            self.TeamPrey.performAction( a_teamPrey )
             
             s_prime = self.gameState()
             reward, game_over = self.reward(s_prime)
@@ -67,6 +67,12 @@ class Environment:
             self.TeamPrey.updateQ(s, a_teamPrey, a_teamPred, s_prime, reward)
             
             s = s_prime
+            if reward != 0:
+                if episode < episodes:
+                    episode += 1
+                    self.resetAgents()
+                else:
+                    done = True
             
     def reward( self, s ):
         '''
@@ -92,16 +98,13 @@ class Environment:
         
         Derive the state based on the locations of the prey and the predators.
         '''
-        state = list()
         prey_x, prey_y = locations[0]
 
-        for i in xrange( self.numberOfPredators ):
-            predator_x, predator_y = locations[i+1]
-            x = ( ( 5 + prey_x - predator_x ) % ( self.width ) ) - 5
-            y = ( ( 5 + prey_y - predator_y ) % ( self.height ) ) - 5
-            state.append( (x, y) )
+        predator_x, predator_y = locations[1]
+        x = ( ( 5 + prey_x - predator_x ) % ( self.width ) ) - 5
+        y = ( ( 5 + prey_y - predator_y ) % ( self.height ) ) - 5
 
-        return tuple(state)
+        return (x,y)
 
     def gameState( self ):
         '''
@@ -109,23 +112,20 @@ class Environment:
         
         Derives the gamestate based on agents location
         '''
-        state = list()
         prey_x, prey_y = self.TeamPrey.Prey.location
-        for Predator in self.TeamPredator.Predators:
-            predator_x, predator_y = Predator.location
-            x = ( ( 5 + prey_x - predator_x ) % ( self.width ) ) - 5
-            y = ( ( 5 + prey_y - predator_y ) % ( self.height ) ) - 5
-            state.append( (x, y) )
+    
+        predator_x, predator_y = self.TeamPredator.Predator.location
+        x = ( ( 5 + prey_x - predator_x ) % ( self.width ) ) - 5
+        y = ( ( 5 + prey_y - predator_y ) % ( self.height ) ) - 5
 
-        return tuple(state)
+        return (x,y)
 
     def resetAgents(self):
         '''
         Reset the position of the prey and predator in this environment.        
         '''
         self.TeamPrey.Prey.location = (5,5)
-        for Predator in self.TeamPredator.Predators:
-            Predator.location = (random.randint(-5,5), random.randint(-5,5))        
+        self.TeamPredator.Predator.location = (random.randint(-5,5), random.randint(-5,5))
     
     def simulateEnvironment(self):
         ''''

@@ -2,6 +2,7 @@ from TeamQLearning import TeamQLearning
 from itertools import izip, product
 import random
 from Prey import Prey
+import gurobipy as grb
 
 argmax = lambda d: max( izip( d.itervalues(), d.iterkeys() ) )[1]    
 
@@ -13,22 +14,28 @@ class TeamPrey():
         alpha = 0.3
         gamma = 0.7
         epsilon = 0.1
-        self.TeamQLearning = TeamQLearning(self, alpha, gamma, epsilon)
         self.Prey = Prey(Environment, location)
+        self.actions = Prey.actions
+        self.TeamQLearning = TeamQLearning(self, alpha, gamma, epsilon)
+        
+        
             
     def updateQ(self, s, a, o, s_prime, r):
         '''
         Update this teams Q and V.
         '''
+        O = self.actions        
+        A = self.actions
+        
         # Use linear programming to obtain optimal policy for this state
         try:
             # Create a new model
             m = grb.Model("MultiAgentMinimax")
-            
+            m.setParam("OutputFlag",0)
             # Create variables
             pi = dict()
-            for a in self.actions:
-                pi[a] = m.addVar( 0.0, 1.0, vtype = grb.GRB.CONTINUOUS, name = a )
+            for a in A:
+                pi[a] = m.addVar( 0.0, 1.0, vtype = grb.GRB.CONTINUOUS, name = str(a) )
         
             # Integrate new variables
             m.update()            
@@ -41,11 +48,14 @@ class TeamPrey():
             m.addConstr( expr == 1, "Total probability" )
         
             # Add more constraints
-            for o in self.Environment.Prey.actions:
-                expr = grb.LinExpr( [ (self.TeamQLearning.Q[s][(a,o)], pi[a]) for a in self.actions ] )
+            for o in O:
+                expr = grb.LinExpr( [ (self.TeamQLearning.Q[s][(a,o)], pi[a]) for a in A ] )
                 m.addConstr( expr >= 0 )
             
             m.optimize()
+            
+            for a in A:
+                self.TeamQLearning.policy[s][a] = pi[a].x
         
         except grb.GurobiError:
             print 'Error reported'
@@ -62,7 +72,7 @@ class TeamPrey():
             # Set probabilities of all actions uniformly
             prob_actions[possible_a] = uniform_epsilon
             
-        best_a = argmax( self.TeamQLearning.Q[s] )
+        best_a = argmax( self.TeamQLearning.policy[s] )
         prob_actions[best_a] += 1 - self.TeamQLearning.epsilon
                     
         # For every action, check if the cumulative probability exceeds a 
